@@ -1,0 +1,40 @@
+# Always-on PhytoWorks device (listen_daemon.py). Copy to /etc/systemd/system/, adjust User=, the paths and the
+# environment, then: systemctl daemon-reload && systemctl enable --now listen_daemon
+# One unit per DEVICE key, and no cron job or second process with the same key.
+
+[Unit]
+Description=PhytoWorks device: Hub capture commands and scheduled captures on one action executor
+Wants=network-online.target
+After=network-online.target
+# Backstop for errors a restart might fix (Hub or network down at start): at most 5 starts in 10 minutes.
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=camera
+# The SDK targets the production Hub by default; set PWS_BASE_URL only for another Hub. The dev Hub is reached
+# through an SSH tunnel to the dev machine; plain HTTP goes only to localhost (device-listen-operations.md, dev stack):
+#Environment=PWS_BASE_URL=http://localhost:15004/api/v1
+# Production broker: MQTTS on :443. The port is required; the SDK refuses a broker URL without one.
+# The dev broker replaces this line: PWS_MQTT_URL=mqtts://localhost:15884 plus PWS_MQTT_CA_FILE=<the dev CA file>.
+Environment=PWS_MQTT_URL=mqtts://mqtt.phytodx.com:443
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/phytoworks/venv/bin/python /opt/phytoworks/listen_daemon.py /etc/phytoworks/camera.key /var/lib/phytoworks/capture 4024 3036 1800
+Restart=on-failure
+RestartSec=30
+# 10: a refused or revoked key, another process on this key, refused topics, no broker URL or credential, a bad key
+# file, a missing [device] extra or a leftover `capture` action (the journal names which). A restart cannot fix these.
+RestartPreventExitStatus=10
+# SIGTERM -> Device.stop(). TimeoutStopSec is systemd's force-kill budget, not an SDK bound. With STOP_GRACE = 30 s
+# a stop takes 72 s when the Hub answers at once, 225 s if each of its 6 supervisor calls (an expired-JWT re-discovery
+# included) spends its 25 s per call and the last shutdown-notify its 3 s. Not counted: a Hub trickling a response,
+# the worker's key exchange at the stop. A kill can leave session settlement, results, the sign-off and the notify to
+# the Hub; its 300 s lease then marks it offline.
+# Derivation: docs/entities/python-sdk/reference/device-listen-operations.md (stop signal and budget section).
+KillSignal=SIGTERM
+KillMode=mixed
+TimeoutStopSec=240
+
+[Install]
+WantedBy=multi-user.target

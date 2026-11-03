@@ -1,0 +1,5 @@
+interface:
+  display_name: "PWS Console"
+  short_description: "Read device structure, status, and rules"
+policy:
+  allow_implicit_invocation: false

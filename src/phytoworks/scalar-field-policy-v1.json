@@ -1,0 +1,76 @@
+{
+  "allowedColormaps": [
+    "viridis",
+    "viridis-reversed",
+    "plasma",
+    "magma",
+    "inferno",
+    "inferno-lifted",
+    "turbo",
+    "thermal",
+    "blue-red",
+    "grayscale"
+  ],
+  "modalities": {
+    "DEPTH": {
+      "allowedDtypes": [
+        "uint16",
+        "float32"
+      ],
+      "allowedUnits": [
+        "m",
+        "mm"
+      ],
+      "defaultColormap": "viridis",
+      "defaultNoData": null,
+      "defaultOffset": 0,
+      "defaultScale": 1,
+      "defaultUnit": "m",
+      "fieldName": "depth",
+      "representation": "scalarField",
+      "zarrArrayName": "scalar"
+    },
+    "FLUORESCENCE": {
+      "allowedDtypes": [
+        "float32"
+      ],
+      "allowedUnits": [
+        ""
+      ],
+      "defaultColormap": "turbo",
+      "defaultNoData": null,
+      "defaultOffset": 0,
+      "defaultScale": 1,
+      "defaultUnit": "",
+      "representation": "scalarFieldSet"
+    },
+    "MULTISPECTRAL": {
+      "representation": "image"
+    },
+    "NIR": {
+      "representation": "image"
+    },
+    "RGB": {
+      "representation": "image"
+    },
+    "THERMAL": {
+      "allowedDtypes": [
+        "uint16"
+      ],
+      "allowedUnits": [
+        "°C"
+      ],
+      "defaultColormap": "inferno",
+      "defaultNoData": null,
+      "defaultOffset": -273.15,
+      "defaultScale": 0.01,
+      "defaultUnit": "°C",
+      "fieldName": "temperature",
+      "representation": "scalarField"
+    }
+  },
+  "source": "packages/shared-types/src/domains/data/media/constants/modality-profiles.ts#MEDIA_MODALITY_PROFILES",
+  "sourceSha256": "038c9145da69c91309f6b91fe654598471418794fb34a73cedd9737a183be5e8",
+  "version": 1,
+  "zarrMappingSource": "packages/shared-types/src/domains/data/media/constants/zarr-storage-layout.ts#SCALAR_FIELD_ARRAY_PATHS"
+}

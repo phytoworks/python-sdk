@@ -1,0 +1,11 @@
+prefix_rule(
+    pattern = ["pws"],
+    decision = "forbidden",
+    justification = "PWS Console uses only pws-console-read; the full pws CLI can change Hub data or equipment.",
+)
+
+prefix_rule(
+    pattern = ["pws-console-read"],
+    decision = "allow",
+    justification = "The profile-bound PWS Console helper exposes only the allowed read commands.",
+)
