@@ -188,7 +188,7 @@ def _write_store(root: Path, descriptor: dict[str, object], arrays: list[np.ndar
             for key in ("scale_factor", "add_offset", "_FillValue", "units", "standard_name")
             if key in band
         }
-        # Uncompressed single chunk: Hub admits no compressor for user stores (media INV-11).
+        # Uncompressed single chunk: Hub admits no compressor for user stores.
         bands_group.create_array(
             cast(str, band["id"]),
             data=pixels,

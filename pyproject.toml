@@ -1,6 +1,6 @@
 [project]
 name = "phytoworks"
-version = "0.1.1"
+version = "0.1.2"
 description = "PhytoWorks operator SDK and pws CLI"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -26,7 +26,7 @@ dependencies = [
 [project.optional-dependencies]
 pandas = ["pandas>=2.3.3"]
 zarr = ["zarr>=3.1.4,<4", "numpy>=2.3.2", "boto3>=1.35", "Pillow>=11.3"]
-# Device.listen(): the MQTT receive loop for Hub capture commands (M5a-3).
+# Device.listen(): the MQTT receive loop for Hub capture commands.
 device = ["paho-mqtt>=2.1,<3"]
 dev = [
   "paho-mqtt>=2.1,<3",
@@ -44,6 +44,8 @@ pws-console-read = "phytoworks._console_read:main"
 [project.urls]
 Documentation = "https://docs.phyto-works.com/guides/sdk-cli/quickstart"
 Homepage = "https://phyto-works.com"
+Source = "https://github.com/phytoworks/python-sdk"
+Issues = "https://github.com/phytoworks/python-sdk/issues"
 
 [build-system]
 # Pinned: the manual PyPI publish rebuilds the tag and must match TestPyPI's digests byte for byte.

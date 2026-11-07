@@ -31,7 +31,7 @@ import httpx
 
 from ._transport import AsyncTransport, Transport
 from .auth import _jwt_claims, _jwt_expiry
-from .config import DeviceJwtStore, normalize_hub_url, require_secure_hub
+from .config import DeviceJwtStore, normalize_hub_url, require_header_safe_secret, require_secure_hub
 from .errors import AuthError, PWSError, TransportError
 
 DEVICE_CLIENT_ID = "pws-cli"
@@ -92,8 +92,7 @@ class DeviceSessionCredential:
         notice: Callable[[str], None] | None = None,
         _logger: logging.Logger | None = None,
     ) -> None:
-        if not session_token.strip():
-            raise ValueError("session_token must not be empty")
+        require_header_safe_secret(session_token, "session_token")
         self._session_token = session_token
         self._hub_url = normalize_hub_url(hub_url) if hub_url else None
         self._store = store
@@ -164,6 +163,7 @@ class DeviceSessionCredential:
                     self.invalidate()
                 if attempt == 0 and error.status_code == 429:
                     delay = _exchange_retry_delay(error)
+                    transport.ensure_time_for(delay)
                     self._notice(f"the Hub is rate limiting session refresh; waiting {delay:.0f}s")
                     (self._sleep or time.sleep)(delay)
                     continue
@@ -283,9 +283,11 @@ def revoke_device_session(transport: Transport, session_token: str) -> RevokeOut
 
     ``revoked`` on 200; ``already_revoked`` on 401 (the Hub answers 401 alike
     for unknown, expired and revoked sessions).  A network failure raises
-    :class:`TransportError` so the caller keeps its local credential.
+    :class:`TransportError` so the caller keeps its local credential. A token that is not header-safe raises
+    :class:`ValueError` with a fixed message, before any request.
     """
 
+    require_header_safe_secret(session_token, "session_token")
     require_secure_hub(transport.base_url)
     response: httpx.Response | None = None
     try:
@@ -302,6 +304,7 @@ def revoke_device_session(transport: Transport, session_token: str) -> RevokeOut
 async def async_revoke_device_session(transport: AsyncTransport, session_token: str) -> RevokeOutcome:
     """Async twin of :func:`revoke_device_session`."""
 
+    require_header_safe_secret(session_token, "session_token")
     require_secure_hub(transport.base_url)
     response: httpx.Response | None = None
     try:

@@ -1,6 +1,6 @@
 ---
 name: pws-console
-description: Explicitly invoke to read PWS spots, device structure and status, components, rules, and recent rule executions through the Python CLI; report in Korean. Use onboarding for installation or login.
+description: Explicitly invoke to read PWS spots, device structure and status, components, rules, and recent rule executions through the Python CLI; report in the user's language. Use onboarding for installation or login.
 license: MIT
 compatibility: Requires the matching phytoworks SDK release and pws-console-read; runtime acceptance is recorded separately for Claude Code and Codex.
 disable-model-invocation: true
@@ -27,8 +27,10 @@ An earlier read does not prove permission for another resource.
 
 Claude Code is supported as packaged. For Codex, keep approvals on (default
 `on-request`), install `agents/codex.rules` via onboarding, and never use this
-skill with approvals disabled. The signed-in account's Hub role is the real
-limit on what can change.
+skill with approvals disabled. The rules file makes every `pws` command ask the
+user for approval and lets `pws-console-read` run, so an unattended agent cannot
+change anything. The signed-in account's Hub role is the real limit on what can
+change.
 
 ## Before querying
 
@@ -72,17 +74,18 @@ Read tool-captured JSON stdout as one document, with stderr separate. Preserve
 unknown fields; missing values are unknown. Report returned rows and paging scope;
 several requests are not one atomic snapshot. See `references/queries.md`.
 
-Report in Korean: Hub root, profile, organization and queried IDs, UTC observation
-start/end, sources, row count, completeness, and limitations. Hub status and cached
-observations do not confirm physical light, water, or equipment effects.
+Report in the language the user writes in, defaulting to English: Hub root, profile,
+organization and queried IDs, UTC observation start/end, sources, row count,
+completeness, and limitations. Hub status and cached observations do not confirm
+physical light, water, or equipment effects.
 
 ```text
-조회: Hub <API root>, 프로필 <profile>, 조직 <ID>, 스팟 <ID>, 장비 <ID>
-관측: <UTC 시작>–<UTC 종료>; 여러 조회는 하나의 원자적 스냅샷이 아님
-구성·상태: <확인한 필드>; 누락 값은 확인 불가
-규칙: <ID>; 최근 실행 최대 10건; 전체 실행 이력은 확인하지 않음
-범위: <반환 건수>, <완료 / 한 페이지 / 제한 / 확인 불가>
-한계: Hub 상태·캐시 관측이며 실제 장비 효과는 확인하지 않음
+Queried: Hub <API root>, profile <profile>, organization <ID>, spot <ID>, device <ID>
+Observed: <UTC start>–<UTC end>; several requests are not one atomic snapshot
+Configuration/status: <fields checked>; missing values are unknown
+Rules: <ID>; latest 10 executions at most; full execution history not checked
+Scope: <rows returned>, <complete / one page / limited / unknown>
+Limits: Hub status and cached observations; physical equipment effects not checked
 ```
 
 ## Failures

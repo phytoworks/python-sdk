@@ -1,4 +1,4 @@
-"""Device sensor components and readings (python-sdk INV-11, INV-12): what ``Device.register(components=...)`` declares
+"""Device sensor components and readings: what ``Device.register(components=...)`` declares
 to the Hub and what ``Device.telemetry()`` turns into points, checked in full before any request.
 
 The declaration is agent-rs's IOBoard numeric sensor topic (``dataType`` FLOAT, ``type`` TELEMETRY, qos 0, not retained,

@@ -1,7 +1,7 @@
 """Media preparation, validation and operation helpers shared by the operator facade and the device persona.
 
 Internal: nothing here is public API. ``phytoworks.facade`` and ``phytoworks.device`` both import from this
-module, so neither persona reaches into the other for them (INV-11).
+module, so neither persona reaches into the other for them.
 """
 
 from __future__ import annotations
@@ -56,7 +56,7 @@ def _build_operation_table(specs: Mapping[str, OperationSpec[BaseModel]]) -> dic
     )
     if disallowed:
         operations = ", ".join(f"{method} {path}" for method, path in disallowed)
-        raise RuntimeError(f"facade operation table contains operation outside the G3 allowlist: {operations}")
+        raise RuntimeError(f"facade operation table contains operation outside the allowlist: {operations}")
     return dict(specs)
 
 
@@ -97,7 +97,7 @@ _HOMOGRAPHY_DETERMINANT_EPSILON = 1e-12
 _MISSING = object()
 
 
-# Mirrors shared-types ``MediaAssetLabelsSchema`` and ``MediaAssetDerivedFromSchema`` (FC-Q3, media INV-13).
+# Mirrors the Hub's media asset label key rule.
 _LABEL_KEY = re.compile(r"[a-z][a-z0-9_]{0,31}")
 
 

@@ -1,4 +1,4 @@
-"""Local scalar policy validation data projected from shared-types.
+"""Local scalar policy validation data generated from the Hub's modality profiles.
 
 The JSON is generated and version-pinned; importing this module does not load
 array or storage extras. Hub remains authoritative at upload completion.

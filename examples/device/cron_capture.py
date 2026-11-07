@@ -3,7 +3,7 @@
     */30 * * * * python cron_capture.py ~/.config/pws/keys/<agent id>.key /data/capture 4024 3036
 
 Your code moves the camera and writes image.jpg and image_thumb.jpg into the folder before this runs; the SDK
-only registers, opens the session, uploads and settles it (python-sdk ADR-0004). A failure after start marks
+only registers, opens the session, uploads and settles it. A failure after start marks
 the session FAILED, so it never stays open. Console shows the device online for five minutes after each run;
 schedule it at least every four minutes to keep it online.
 Several labelled views in one session (identity_label_keys) need PWS_MEDIA_MULTI_VIEW_WRITE_ENABLED on the Hub.

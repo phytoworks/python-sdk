@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import ipaddress
 import logging
 import os
@@ -11,7 +12,7 @@ import tomllib
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
 from typing import Any, Literal, TextIO
@@ -26,7 +27,7 @@ except ImportError:  # pragma: no cover - Windows has no flock; writes there are
 
 from .errors import AuthError, CredentialMissingError, ValidationError
 
-# The production Hub (owner 2026-10-13, python-sdk ADR-0005); any other Hub is chosen with PWS_BASE_URL or --base-url.
+# The production Hub; any other Hub is chosen with PWS_BASE_URL or --base-url.
 DEFAULT_BASE_URL = "https://api-0.phyto-works.com/api/v1"
 
 CredentialKind = Literal["device_session", "session", "api_key"]
@@ -244,6 +245,124 @@ class DeviceJwtStore:
             _write_private(_dump_document(document), self._path)
 
 
+_TOOL_GATEWAY_SESSION_KEYS = frozenset(
+    {
+        "tool_gateway_hub_origin",
+        "tool_gateway_org",
+        "tool_gateway_user_session_sha256",
+        "tool_gateway_session_id",
+        "tool_gateway_token",
+        "tool_gateway_expires_at",
+    }
+)
+
+
+class ToolGatewaySessionStore:
+    """One profile's current external session and its narrow Gateway credential.
+
+    The capability shares the existing 0600 credentials file and lock. It is
+    bound to the Hub origin, organization, and user session that issued it;
+    replacing or removing any of those credentials makes the cache unusable.
+    """
+
+    def __init__(self, path: Path, profile: str, hub_url: str, organization_id: str, user_session: str) -> None:
+        if not profile or not hub_url or not organization_id or not user_session:
+            raise ValueError("profile, Hub, organization, and user session are required")
+        self._path = path
+        self._profile = profile
+        self._hub_origin = _hub_origin(hub_url)
+        self._organization_id = organization_id
+        self._user_session_sha256 = hashlib.sha256(user_session.encode("utf-8")).hexdigest()
+
+    def __repr__(self) -> str:
+        return f"ToolGatewaySessionStore(path={str(self._path)!r}, profile={self._profile!r})"
+
+    def load(self) -> dict[str, str] | None:
+        values = _profile_values(_load_document(self._path), self._profile)
+        if (
+            values.get("tool_gateway_hub_origin") != self._hub_origin
+            or values.get("tool_gateway_org") != self._organization_id
+            or values.get("tool_gateway_user_session_sha256") != self._user_session_sha256
+        ):
+            return None
+        session_id = values.get("tool_gateway_session_id")
+        token = values.get("tool_gateway_token")
+        expires_at = values.get("tool_gateway_expires_at")
+        if not (isinstance(session_id, str) and session_id and isinstance(token, str) and token):
+            return None
+        if not isinstance(expires_at, str):
+            return None
+        try:
+            expiry = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if expiry.tzinfo is None or expiry <= datetime.now(UTC):
+            return None
+        return {"sessionId": session_id, "token": token, "expiresAt": expiry.isoformat().replace("+00:00", "Z")}
+
+    def save(self, session_id: str, token: str, expires_at: datetime) -> None:
+        if not session_id or not token or expires_at.tzinfo is None:
+            raise ValueError("a session id, token, and timezone-aware expiry are required")
+        if expires_at <= datetime.now(UTC):
+            raise ValueError("Gateway credential is already expired")
+        with _locked(self._path):
+            document = _load_document(self._path)
+            values = _profile_values(document, self._profile)
+            current_user_session = values.get("device_session_token")
+            if (
+                isinstance(current_user_session, str)
+                and hashlib.sha256(current_user_session.encode("utf-8")).hexdigest() != self._user_session_sha256
+            ):
+                raise AuthError("the device login changed while the Gateway session was being saved")
+            values = {key: value for key, value in values.items() if key not in _TOOL_GATEWAY_SESSION_KEYS}
+            values.update(
+                {
+                    "tool_gateway_hub_origin": self._hub_origin,
+                    "tool_gateway_org": self._organization_id,
+                    "tool_gateway_user_session_sha256": self._user_session_sha256,
+                    "tool_gateway_session_id": session_id,
+                    "tool_gateway_token": token,
+                    "tool_gateway_expires_at": expires_at.astimezone(UTC).isoformat().replace("+00:00", "Z"),
+                }
+            )
+            _set_profile(document, self._profile, values)
+            _write_private(_dump_document(document), self._path)
+
+    def clear(self, session_id: str) -> None:
+        with _locked(self._path):
+            document = _load_document(self._path)
+            values = _profile_values(document, self._profile)
+            if (
+                values.get("tool_gateway_hub_origin") != self._hub_origin
+                or values.get("tool_gateway_org") != self._organization_id
+                or values.get("tool_gateway_user_session_sha256") != self._user_session_sha256
+                or values.get("tool_gateway_session_id") != session_id
+            ):
+                return
+            values = {key: value for key, value in values.items() if key not in _TOOL_GATEWAY_SESSION_KEYS}
+            _set_profile(document, self._profile, values)
+            if not document:
+                self._path.unlink(missing_ok=True)
+            else:
+                _write_private(_dump_document(document), self._path)
+
+
+def _hub_origin(url: str) -> str:
+    parts = urlsplit(url)
+    if parts.scheme not in {"http", "https"} or not parts.hostname:
+        raise ValueError("Hub URL must have an HTTP origin")
+    scheme = parts.scheme.lower()
+    hostname = parts.hostname.lower()
+    try:
+        port = parts.port
+    except ValueError as exc:
+        raise ValueError("Hub URL has an invalid port") from exc
+    default_port = (scheme == "https" and port == 443) or (scheme == "http" and port == 80)
+    host = f"[{hostname}]" if ":" in hostname and not hostname.startswith("[") else hostname
+    authority = host if port is None or default_port else f"{host}:{port}"
+    return f"{scheme}://{authority}"
+
+
 _JWT_KEYS = frozenset({"device_jwt", "device_jwt_expires_at"})
 _logger = logging.getLogger(__name__)
 
@@ -270,6 +389,25 @@ def credentials_path() -> Path:
     return Path(configured).expanduser() if configured else Path.home() / ".config" / "pws" / "credentials.toml"
 
 
+def is_header_safe_secret(value: str) -> bool:
+    """Printable ASCII without whitespace: the only shape of key or token that is safe to put in an HTTP header.
+
+    A control byte or an undecodable byte would otherwise reach an HTTP header, whose error echoes the value, or fail
+    in the UTF-8 profile writer after the old session was retired.
+    """
+
+    return bool(value) and value.isascii() and value.isprintable() and not any(c.isspace() for c in value)
+
+
+def require_header_safe_secret(value: str, name: str) -> None:
+    """Refuse a caller-supplied key or token with a fixed message that never contains the value."""
+
+    if not value.strip():
+        raise ValueError(f"{name} must not be empty")
+    if not is_header_safe_secret(value):
+        raise ValueError(f"{name} must be printable ASCII without whitespace or control characters")
+
+
 def read_agent_key_file(source: Path | TextIO) -> str:
     """One agent key from a private key file (``pws edge agents keys issue --out``) or a stream such as standard input.
 
@@ -284,9 +422,7 @@ def read_agent_key_file(source: Path | TextIO) -> str:
         name, key = str(source), source.read_text(encoding="utf-8").strip()
     else:
         name, key = "standard input", source.read().removesuffix("\n")
-    # Printable ASCII only: a control byte or an undecodable byte would otherwise reach an HTTP header (whose error
-    # echoes the value) or fail in the UTF-8 profile writer after the old session was retired.
-    if not key or not (key.isascii() and key.isprintable()) or any(character.isspace() for character in key):
+    if not is_header_safe_secret(key):
         raise ValueError(f"{name} is not a DEVICE key file (write one with `pws edge agents keys issue --out`)")
     return key
 

@@ -63,6 +63,16 @@ from .errors import (
 from .facade import MAX_PAGE_SIZE, PWS, IssuedAccessKey, _prepare_download_directory
 from .models import SpotStructure
 from .models.generated import SpotStructureDeviceAction, SpotStructureDeviceComponentAction
+from .phenos import (
+    SESSION_USAGE,
+    PhenosGroup,
+    run_approval_read_command,
+    run_approval_wait_command,
+    run_session_command,
+    run_wait_command,
+    usage_error,
+)
+from .phenos_commands_generated import add_generated_commands
 from .provisioning import check_provisioning
 
 
@@ -164,19 +174,43 @@ keys_app = group(
 )
 captures_app = group("data", "captures", help="Captures (read-only).")
 media_app = group("data", "media", help="Media assets, uploads, and downloads.")
+phenos_app = typer.Typer(
+    cls=PhenosGroup, no_args_is_help=True, help="External Phenos Tool Gateway sessions and operations."
+)
+phenos_sessions_app = typer.Typer(no_args_is_help=True, help="Create, inspect, and revoke an external session.")
+add_generated_commands(phenos_app)
+phenos_app.add_typer(phenos_sessions_app, name="session")
+# `execution wait` is hand-written (not a registry operation, so the in-app model never sees it); it joins the
+# generated `execution` group.
+phenos_execution_app = next(
+    group.typer_instance
+    for group in phenos_app.registered_groups
+    if group.name == "execution" and group.typer_instance is not None
+)
+app.add_typer(phenos_app, name="phenos")
+approvals_app = typer.Typer(
+    cls=PhenosGroup,
+    no_args_is_help=True,
+    help="Requests from this login that wait for a person's approval in Phenos.",
+)
+app.add_typer(approvals_app, name="approvals")
 
 
-# Typed exit codes (interface contract IC-3 fixes 6 and 7; the rest are this CLI's contract).
+# Typed exit codes.
+# The Phenos error codes pick a category; the numbers stay here.
 EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_USAGE = 2
 EXIT_AUTH = 3
 EXIT_NOT_FOUND = 4
 EXIT_PERMISSION = 5
-EXIT_ACTION_FAILED = 6
-EXIT_ACTION_TIMEOUT = 7
+EXIT_ACTION_FAILED = 6  # a started job (action or Phenos execution) ended failed or cancelled
+EXIT_ACTION_TIMEOUT = 7  # a started job's outcome is unknown: it may still be running (timed out waiting, or lost)
 EXIT_PROVISIONING_DENIED = 8
 EXIT_PROVISIONING_UNKNOWN = 9
+# A Phenos change or delete waits for a person's approval and nothing started. 10, because 8 and 9 belong to
+# `pws provisioning check`.
+EXIT_APPROVAL_PENDING = 10
 
 
 def exit_code_for(error: PWSError) -> int:
@@ -583,11 +617,11 @@ SCOPE_ORDER = "the scope comes from --org, else PWS_ORG, else the profile's org"
 
 
 def _report_denied(client: PWS, error: PWSError, needs: str) -> int:
-    """Name the missing capability when the scope is one of the caller's organizations, else the scope (#309).
+    """Name the missing capability when the scope is one of the caller's organizations, else the scope.
 
     The Hub answers a wrong organization and a missing capability with the same 403 ``ACCESS_DENIED``, so the
     caller's memberships decide which one this is. The text is static apart from the caller's own role: nothing
-    from the response is echoed (a key route's error is status-only, INV-10).
+    from the response is echoed (a key route's error is status-only).
     """
 
     org = client.config.org
@@ -703,6 +737,127 @@ def root_options(
         logger.propagate = propagate
 
     ctx.call_on_close(restore)
+
+
+def _external_reference(value: str, *, image: bool) -> dict[str, object]:
+    identifier, separator, revision = value.partition(":")
+    reference: dict[str, object] = {"id": identifier}
+    if separator:
+        if not revision:
+            raise typer.BadParameter("a reference revision after ':' must not be empty")
+        if image:
+            reference["revision"] = revision
+        else:
+            try:
+                reference["revision"] = int(revision)
+            except ValueError:
+                raise typer.BadParameter("an annotation revision after ':' must be a non-negative integer") from None
+    return reference
+
+
+@phenos_sessions_app.command("start", help="Start a scoped external execution session.")
+def phenos_session_start(
+    ctx: typer.Context,
+    image: Annotated[str, typer.Option("--image", help="Image id, optionally followed by :revision.")],
+    annotation: Annotated[
+        list[str] | None,
+        typer.Option("--annotation", help="Annotation id, repeat up to three times; optionally id:revision."),
+    ] = None,
+    client: Annotated[str, typer.Option("--client", help="Client label stored with the session.")] = "pws-cli",
+    ttl: Annotated[int | None, typer.Option("--ttl", help="Session lifetime in seconds.")] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Print the session as JSON.")] = False,
+) -> None:
+    try:
+        references = {
+            "image": _external_reference(image, image=True),
+            "annotations": [_external_reference(item, image=False) for item in annotation or []],
+        }
+    except typer.BadParameter as exc:
+        usage_error(ctx.obj, exc.message, usage=SESSION_USAGE["start"], json_output=json_output)
+    request: dict[str, object] = {"clientName": client, "references": references}
+    if ttl is not None:
+        request["ttlSeconds"] = ttl
+    run_session_command(ctx.obj, "start", request=request, json_output=json_output)
+
+
+@phenos_sessions_app.command("show", help="Read the active external session.")
+def phenos_session_show(
+    ctx: typer.Context,
+    session_id: Annotated[str | None, typer.Option("--session", help="Use this stored external session.")] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Print the session as JSON.")] = False,
+) -> None:
+    run_session_command(ctx.obj, "show", session_id=session_id, json_output=json_output)
+
+
+@phenos_sessions_app.command("end", help="Revoke the active external session.")
+def phenos_session_end(
+    ctx: typer.Context,
+    session_id: Annotated[str | None, typer.Option("--session", help="Use this stored external session.")] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Print the revoked session as JSON.")] = False,
+) -> None:
+    run_session_command(ctx.obj, "end", session_id=session_id, json_output=json_output)
+
+
+@phenos_execution_app.command(
+    "wait",
+    help="Wait until an execution succeeds, fails or is cancelled. Exit 0 on success, 6 on failure or cancel, "
+    "7 when the deadline passes first (it may still be running).",
+)
+def phenos_execution_wait(
+    ctx: typer.Context,
+    execution: Annotated[str, typer.Argument(help="Execution id to wait for.")],
+    timeout: Annotated[
+        float | None,
+        typer.Option(
+            "--timeout",
+            min=0,
+            help="Seconds to wait, not a hard stop (the first check always runs and a check under way is not cut off); "
+            "default is the rest of the stored session's lifetime.",
+        ),
+    ] = None,
+    json_output: Annotated[bool, typer.Option("--json", help="Print the execution as JSON.")] = False,
+    session_id: Annotated[str | None, typer.Option("--session", help="Use this stored external session.")] = None,
+) -> None:
+    run_wait_command(ctx.obj, execution, timeout=timeout, json_output=json_output, session_id=session_id)
+
+
+ApprovalIdArg = Annotated[str, typer.Argument(help="Approval id, as the change or delete command printed it.")]
+ApprovalJsonOption = Annotated[bool, typer.Option("--json", help="Print the approval as JSON.")]
+
+
+@approvals_app.command(
+    "wait",
+    help="Wait until a person decides. Exit 0 when approved (run the same command again to use it), 10 when the time "
+    "runs out first, 1 when it was rejected, expired, invalidated or cancelled.",
+)
+def approvals_wait(
+    ctx: typer.Context,
+    approval_id: ApprovalIdArg,
+    timeout: Annotated[
+        float | None,
+        typer.Option(
+            "--timeout",
+            min=0,
+            help="Seconds to wait, not a hard stop (the first check always runs and a check under way is not cut off); "
+            "default is until the request expires.",
+        ),
+    ] = None,
+    json_output: ApprovalJsonOption = False,
+) -> None:
+    run_approval_wait_command(ctx.obj, approval_id, timeout=timeout, json_output=json_output)
+
+
+@approvals_app.command("show", help="Read one request and its state. Exit 0 whatever the state.")
+def approvals_show(ctx: typer.Context, approval_id: ApprovalIdArg, json_output: ApprovalJsonOption = False) -> None:
+    run_approval_read_command(ctx.obj, approval_id, json_output=json_output)
+
+
+@approvals_app.command("list", help="List this login's requests that are still open.")
+def approvals_list(
+    ctx: typer.Context,
+    json_output: Annotated[bool, typer.Option("--json", help="Print the requests as JSON.")] = False,
+) -> None:
+    run_approval_read_command(ctx.obj, None, json_output=json_output)
 
 
 # ---------------------------------------------------------------------------
@@ -864,18 +1019,13 @@ def actions_executions(
 
 
 @orgs_app.command("list")
-def orgs_list(
-    ctx: typer.Context,
-    page: Annotated[int | None, typer.Option("--page", min=1)] = None,
-    limit: Annotated[int | None, typer.Option("--limit", min=1)] = None,
-) -> None:
+def orgs_list(ctx: typer.Context) -> None:
     """List the Workspaces you belong to."""
 
-    context = _listing_context(ctx, page=page, limit=limit)
+    context: CliContext = ctx.obj
 
     def action(client: PWS) -> None:
-        result = client.organizations.list(page=page, limit=limit)
-        emit_listing(context, result, columns=ORGANIZATION_COLUMNS, limit=limit, page=page)
+        emit_listing(context, client.my_organizations(), columns=ORGANIZATION_COLUMNS, limit=None, page=None)
 
     _run(context, action)
 
@@ -1023,7 +1173,7 @@ def devices_status(
 
 
 # ---------------------------------------------------------------------------
-# agent device keys (identity plan L3): the secret goes to a 0600 file, never to stdout/stderr
+# agent device keys: the secret goes to a 0600 file, never to stdout/stderr
 # ---------------------------------------------------------------------------
 
 AgentOption = Annotated[str, typer.Option("--agent", help="Agent id (`pws edge agents list` lists them).")]
@@ -1635,7 +1785,7 @@ def _retire_device_session(path: Path, profile: str) -> None:
             outcome = revoke_device_session(transport, old_token)
         finally:
             transport.close()
-    except PWSError:
+    except (PWSError, ValueError):  # ValueError: a stored token that is not header-safe; its message omits the value
         outcome = "failed"
     if outcome == "failed":
         typer.echo(
@@ -1684,6 +1834,15 @@ def auth_logout(ctx: typer.Context, profile: Annotated[str | None, typer.Option(
             transport = Transport(hub)
             try:
                 server_session = revoke_device_session(transport, device_token)
+            except ValueError:
+                # A stored token that is not header-safe cannot be a live session: nothing to revoke, so the
+                # local credential goes. The message omits the value, and nothing keeps the exception.
+                typer.echo(
+                    "the stored device session token is malformed, so it was not revoked on the Hub; "
+                    "removing the local credential",
+                    err=True,
+                )
+                server_session = "not_revoked"
             except PWSError as exc:
                 typer.echo("the local credential was kept; run `pws auth logout` again to retry", err=True)
                 exit_code = _report(exc)

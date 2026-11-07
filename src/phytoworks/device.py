@@ -1,10 +1,10 @@
 """Device persona: a field device calls the Hub's agent routes with its own DEVICE key.
 
 Plain calls are HTTP only and start no thread: what to capture and when is the caller's code (a cron job, a
-motor sequence); this module keeps the Hub's credential and call-order contract (python-sdk ADR-0004,
-INV-11). :meth:`Device.listen` is the one exception: it blocks the calling thread on the device's one action
-executor -- Hub commands over MQTT and :meth:`Device.submit` from the caller's own threads -- and starts one
-worker thread for the handler (``phytoworks[device]`` extra, INV-12). A Device that served is single-use.
+motor sequence); this module keeps the Hub's credential and call-order contract. :meth:`Device.listen` is the
+one exception: it blocks the calling thread on the device's one action executor -- Hub commands over MQTT and
+:meth:`Device.submit` from the caller's own threads -- and starts one worker thread for the handler
+(``phytoworks[device]`` extra). A Device that served is single-use.
 It shares no credential or HTTP client with :class:`phytoworks.PWS`.
 """
 
@@ -157,7 +157,7 @@ SUPERVISOR_LOCK_WAIT = 1.0
 SHUTDOWN_NOTIFY_DEADLINE = 3.0
 SHUTDOWN_NOTIFY_TIMEOUT = httpx.Timeout(SHUTDOWN_NOTIFY_DEADLINE)
 
-# idle -> serving -> closing -> retired, written only under Device._lock (python-sdk INV-11, INV-12); _retire writes
+# idle -> serving -> closing -> retired, written only under Device._lock; _retire writes
 # retired under Device._in_flight too, which admits the shutdown-notify's thread while retirement holds the lock.
 _State = Literal["idle", "serving", "closing", "retired"]
 # Who asks for a Hub call: the caller's own code ("bare", only while idle) or the executor -- its supervisor, its
@@ -181,7 +181,7 @@ class MqttEndpoint:
 
 
 class DeviceRoute:
-    """Every Hub operation :class:`Device` calls; all are G3-allowlisted and none is on the operator facade."""
+    """Every Hub operation :class:`Device` calls; all are allowlisted and none is on the operator facade."""
 
     @classmethod
     def all(cls) -> tuple[tuple[str, str], ...]:
@@ -203,7 +203,7 @@ class Device:
     this Device had just replaced the session is sent once more with the new token. A 401 this Device did not
     cause (another process signed in with the key) makes it sign in again and send that call once more, at most
     once per :data:`~phytoworks._device_mqtt.REDISCOVERY_COOLDOWN` -- two processes on one key take the session
-    from each other that often. A key the Hub then refuses is not tried again (python-sdk INV-11).
+    from each other that often. A key the Hub then refuses is not tried again.
     Liveness comes from this process alone -- every call heartbeats first when :data:`HEARTBEAT_INTERVAL`
     has passed -- so a cron that runs at least every four minutes keeps the device online; a longer gap shows
     it offline until the next run.
@@ -266,7 +266,7 @@ class Device:
         self._actions: dict[str, Action] = {}  # the registered action table by name: what submit() runs
         self._remote: dict[str, Action] = {}  # Hub actionDefId -> the remote action a Hub command runs
         # (component identifier, topic name) -> topic id, from the last register that carried components; swapped whole
-        # under the lock by that register only (python-sdk INV-11), read without it.
+        # under the lock by that register only, read without it.
         self._topics: dict[tuple[str, str], str] = {}
         self._components: dict[str, str] = {}  # registered local identifier -> Hub UUID
         self._loop: Supervisor | None = None
@@ -390,7 +390,7 @@ class Device:
         the Hub's answer; more than 50 topics, 1000 points on one topic or 1,000,000 bytes of body raise
         :class:`ValueError` too (send them in several calls). While :meth:`listen` serves, from any thread, the points
         join the receive loop's queue and this returns ``None`` at once: manual mode and :meth:`submit`'s limit do not
-        apply, and the loop sends them oldest first every 10 s, waiting out a 429 (python-sdk INV-12).
+        apply, and the loop sends them oldest first every 10 s, waiting out a 429.
         """
 
         return self._telemetry(readings, at, "bare", None)
@@ -917,7 +917,7 @@ class Device:
 
         ``thread.start()`` is no barrier, and the thread cannot take the lock retirement holds: it is admitted, just
         before its request, under the in-flight condition ``retired`` is written under, so it falls wholly before
-        retirement (sent) or after it (never sent) -- python-sdk INV-11."""
+        retirement (sent) or after it (never sent)."""
 
         try:
             headers, _generation = self._session_headers(self._notifier, True, "loop", None)
@@ -977,7 +977,7 @@ class Device:
     @contextmanager
     def _request(self, who: _Who, scope: _ScopedDevice | None, supervised: bool = False) -> Iterator[None]:
         """One request's start: admitted under the lock and the in-flight condition and counted until it ends, so
-        retirement and a revoke each fall wholly before it (it is refused) or after it started (python-sdk INV-11)."""
+        retirement and a revoke each fall wholly before it (it is refused) or after it started."""
 
         with self._locked(supervised), self._in_flight:
             self._admit(who, scope)
@@ -1127,7 +1127,7 @@ class Device:
                 raise
             refused = error
         # A 401 on a JWT route is the guard refusing a dropped session before any handler ran, so the call is sent
-        # once more: with the session this Device adopted meanwhile, or else after signing in again (INV-11). Handled
+        # once more: with the session this Device adopted meanwhile, or else after signing in again. Handled
         # out of the except block so no error here is chained to the refused request.
         with self._locked(supervised):
             if self._generation == generation and not self._replace_session(transport, who, scope):
@@ -1365,7 +1365,7 @@ def _slot(value: object) -> MqttSlot | None:
 
 
 def _status_only_call[T](what: str, call: Callable[[], T]) -> T:
-    """Run one Hub or presigned call; a failure keeps its class and status only (INV-11), never the request,
+    """Run one Hub or presigned call; a failure keeps its class and status only, never the request,
     the server's body or the original exception."""
 
     try:
@@ -1435,7 +1435,7 @@ def _check_name_translation(action: Action) -> None:
 
 
 def _declaration(action: Action) -> dict[str, object]:
-    """agent-rs's ``ActionDefinition`` fields (L4 design §4); ``timeout`` always, so the Hub never falls back to 30."""
+    """agent-rs's ``ActionDefinition`` fields ; ``timeout`` always, so the Hub never falls back to 30."""
 
     declared: dict[str, object] = {
         "name": action.name,
@@ -1454,7 +1454,7 @@ def _declaration(action: Action) -> dict[str, object]:
 
 def _refuse_legacy_captures(rows: Sequence[Mapping[str, object]], device_id: str | None) -> None:
     """An active device-level ``CAPTURE`` under another name would win Console's pick over ``device.capture``
-    (owner AE-Q7 (a); executor design D9)."""
+    ."""
 
     legacy = [
         row
@@ -1466,7 +1466,7 @@ def _refuse_legacy_captures(rows: Sequence[Mapping[str, object]], device_id: str
         routes = ", ".join(f"DELETE /api/v1/devices/{device_id}/actions/{row.get('id')}" for row in legacy)
         raise ValueError(
             f"device {device_id} still has the CAPTURE action {named}, which Console picks instead of "
-            f"{CAPTURE_ACTION_NAME!r}. Clean it up (executor design D9): 1. stop every process that still registers "
+            f"{CAPTURE_ACTION_NAME!r}. Clean it up: 1. stop every process that still registers "
             f"it -- registering it again revives it; 2. delete it as a user with Device delete rights ({routes}); "
             "3. call register() again"
         )

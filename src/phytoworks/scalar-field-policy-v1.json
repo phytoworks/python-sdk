@@ -69,8 +69,6 @@
       "representation": "scalarField"
     }
   },
-  "source": "packages/shared-types/src/domains/data/media/constants/modality-profiles.ts#MEDIA_MODALITY_PROFILES",
   "sourceSha256": "038c9145da69c91309f6b91fe654598471418794fb34a73cedd9737a183be5e8",
-  "version": 1,
-  "zarrMappingSource": "packages/shared-types/src/domains/data/media/constants/zarr-storage-layout.ts#SCALAR_FIELD_ARRAY_PATHS"
+  "version": 1
 }

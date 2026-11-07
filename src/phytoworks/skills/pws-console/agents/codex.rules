@@ -1,11 +1,15 @@
 prefix_rule(
     pattern = ["pws"],
-    decision = "forbidden",
-    justification = "PWS Console uses only pws-console-read; the full pws CLI can change Hub data or equipment.",
+    decision = "prompt",
+    justification = "PWS Console uses only pws-console-read; the full pws CLI can change Hub data or equipment, so every pws command needs the user's approval.",
+    match = ["pws auth login", "pws edge spots list"],
+    not_match = ["pws-console-read --profile pilot --json config show"],
 )
 
 prefix_rule(
     pattern = ["pws-console-read"],
     decision = "allow",
     justification = "The profile-bound PWS Console helper exposes only the allowed read commands.",
+    match = ["pws-console-read --profile pilot --json config show"],
+    not_match = ["pws auth login"],
 )

@@ -1,8 +1,7 @@
 """Generated wire models from the committed Hub OpenAPI artifact.
 
-DO NOT EDIT BY HAND. Regenerate with:
-    uv run --package phytoworks python packages/sdk/python/scripts/generate_models.py
-and verify with the same command plus ``--check`` (CI runs it).
+DO NOT EDIT BY HAND. This file is generated from the Hub OpenAPI document by
+``scripts/generate_models.py`` in the PhytoWorks repository.
 
 Every class derives from ``phytoworks.models._base.WireModel``; the
 allowlist in ``scripts/model-allowlist.json`` decides which components
@@ -51,10 +50,12 @@ exist here.  Inline objects were hoisted under these names:
   BandProvenanceZarrSealMember <- BandProvenance.zarrSeal.members[]
   CaptureSessionDetailDevice <- CaptureSessionDetail.device
   CaptureSessionDetailMedia <- CaptureSessionDetail.media[]
+  CaptureSessionDetailMediaOriginal <- CaptureSessionDetail.media[].original
   CaptureSessionDetailMediaProvenance <- CaptureSessionDetail.media[].provenance
   CaptureSessionDetailMediaProvenanceActor <- CaptureSessionDetail.media[].provenance.actor
   CaptureSessionDetailSpot <- CaptureSessionDetail.spot
   CaptureSessionMedia <- CaptureSession.media[]
+  CaptureSessionMediaOriginal <- CaptureSession.media[].original
   CaptureSessionMediaProvenance <- CaptureSession.media[].provenance
   CaptureSessionMediaProvenanceActor <- CaptureSession.media[].provenance.actor
   CaptureSessionSpot <- CaptureSession.spot
@@ -65,8 +66,47 @@ exist here.  Inline objects were hoisted under these names:
   ManualActionDryRunChecksOnline <- ManualActionDryRun.checks.online
   ManualActionDryRunChecksSchema <- ManualActionDryRun.checks.schema
   ManualActionDryRunChecksScope <- ManualActionDryRun.checks.scope
+  MediaAssetOriginal <- MediaAsset.original
   MediaAssetProvenance <- MediaAsset.provenance
   MediaAssetProvenanceActor <- MediaAsset.provenance.actor
+  PhenosSessionCreationCredential <- PhenosSessionCreation.credential
+  PhenosSessionCreationSession <- PhenosSessionCreation.session
+  PhenosSessionCreationSessionReferences <- PhenosSessionCreation.session.references
+  PhenosSessionCreationSessionReferencesAnnotation <- PhenosSessionCreation.session.references.annotations[]
+  PhenosSessionCreationSessionReferencesImage <- PhenosSessionCreation.session.references.image
+  PhenosSessionCreationSessionReferencesImageSourceBinding <- PhenosSessionCreation.session.references.image.sourceBinding
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystem <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAngleConvention <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.angleConvention
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxes <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesX <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes.x
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesY <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes.y
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemDimensions <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.dimensions
+  PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin <- PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.pixelOrigin
+  PhenosSessionCreationSessionReferencesImageSourceBindingGridExifApplied <- PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:ExifApplied>
+  PhenosSessionCreationSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions <- PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:ExifApplied>.storedDimensions
+  PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlane <- PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>
+  PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneAxe <- PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>.axes[]
+  PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneDimensions <- PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>.dimensions
+  PhenosSessionCreationSessionReferencesImageSourceBindingPlane <- PhenosSessionCreation.session.references.image.sourceBinding.plane
+  PhenosSessionCreationSessionReferencesImageSourceBindingPlaneAxisSelection <- PhenosSessionCreation.session.references.image.sourceBinding.plane.axisSelection
+  PhenosSessionReferences <- PhenosSession.references
+  PhenosSessionReferencesAnnotation <- PhenosSession.references.annotations[]
+  PhenosSessionReferencesImage <- PhenosSession.references.image
+  PhenosSessionReferencesImageSourceBinding <- PhenosSession.references.image.sourceBinding
+  PhenosSessionReferencesImageSourceBindingCoordinateSystem <- PhenosSession.references.image.sourceBinding.coordinateSystem
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemAngleConvention <- PhenosSession.references.image.sourceBinding.coordinateSystem.angleConvention
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemAxes <- PhenosSession.references.image.sourceBinding.coordinateSystem.axes
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesX <- PhenosSession.references.image.sourceBinding.coordinateSystem.axes.x
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesY <- PhenosSession.references.image.sourceBinding.coordinateSystem.axes.y
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemDimensions <- PhenosSession.references.image.sourceBinding.coordinateSystem.dimensions
+  PhenosSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin <- PhenosSession.references.image.sourceBinding.coordinateSystem.pixelOrigin
+  PhenosSessionReferencesImageSourceBindingGridExifApplied <- PhenosSession.references.image.sourceBinding.grid.<oneOf:ExifApplied>
+  PhenosSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions <- PhenosSession.references.image.sourceBinding.grid.<oneOf:ExifApplied>.storedDimensions
+  PhenosSessionReferencesImageSourceBindingGridNativePlane <- PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>
+  PhenosSessionReferencesImageSourceBindingGridNativePlaneAxe <- PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.axes[]
+  PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions <- PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.dimensions
+  PhenosSessionReferencesImageSourceBindingPlane <- PhenosSession.references.image.sourceBinding.plane
+  PhenosSessionReferencesImageSourceBindingPlaneAxisSelection <- PhenosSession.references.image.sourceBinding.plane.axisSelection
   RuleAction <- Rule.actions[]
   RuleActionActionDefinition <- Rule.actions[].actionDefinition
   RuleActionActionDefinitionNameTranslation <- Rule.actions[].actionDefinition.nameTranslation
@@ -113,11 +153,10 @@ exist here.  Inline objects were hoisted under these names:
   SpotTag <- Spot.tags[]
 
 Generator: datamodel-code-generator 0.76.1
-Artifact: apps/hub/openapi.json
-Artifact SHA-256: 19e47beb442967ad3a1e1102e2794d3017347944d4e714b36a435812d7a8319a
+Artifact SHA-256: bafbe710bc76212bbb064ab2bf2233e0ad97a740c691976fe64e159da6f09dc8
 Allowlist: scripts/model-allowlist.json
-Allowlist SHA-256: 755b77d705e0631d92bb17342636a39967d4d80481caa576e213d0936a8f04a4
-Body SHA-256: 351e168f06cfa97e755d3cf8f6d1b8bb0f73e6ab34c4ff8e1895ec5e8009a212
+Allowlist SHA-256: 17cdde5072211f85a8b1873c2e8c9c135cb36c1e924fcc83ea443c8ed2e848bd
+Body SHA-256: 36691a9c57fc5daff108cc3b4b0e213a1e11398b182eb809f5b9dabc7742b650
 """
 
 from __future__ import annotations
@@ -332,6 +371,16 @@ class AgentImageUploadComplete(WireModel):
     model_config = ConfigDict(
         extra="allow",
     )
+
+
+class ArtifactDownload(WireModel):
+    """
+    Wire model for OpenAPI component OpenArtifactResponseDto.
+    """
+
+    artifact_id: Annotated[str, Field(alias="artifactId")]
+    download_url: Annotated[str, Field(alias="downloadUrl")]
+    expires_at: Annotated[AwareDatetime, Field(alias="expiresAt")]
 
 
 class BandProvenance(WireModel):
@@ -963,9 +1012,19 @@ class CaptureSessionDetailMedia(WireModel):
     capture_parameters: Annotated[dict[str, Any] | None, Field(alias="captureParameters")]
     quality_metrics: Annotated[dict[str, Any] | None, Field(alias="qualityMetrics")]
     metadata: Annotated[dict[str, Any] | None, Field(...)]
+    original: CaptureSessionDetailMediaOriginal | None = None
     captured_at: Annotated[AwareDatetime | None, Field(alias="capturedAt")]
     created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
     updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class CaptureSessionDetailMediaOriginal(WireModel):
+    """
+    Inline object hoisted from CaptureSessionDetail.media[].original.
+    """
+
+    file_id: Annotated[str, Field(alias="fileId")]
+    same_size: Annotated[bool, Field(alias="sameSize")]
 
 
 class CaptureSessionDetailMediaProvenance(WireModel):
@@ -1026,9 +1085,19 @@ class CaptureSessionMedia(WireModel):
     capture_parameters: Annotated[dict[str, Any] | None, Field(alias="captureParameters")]
     quality_metrics: Annotated[dict[str, Any] | None, Field(alias="qualityMetrics")]
     metadata: Annotated[dict[str, Any] | None, Field(...)]
+    original: CaptureSessionMediaOriginal | None = None
     captured_at: Annotated[AwareDatetime | None, Field(alias="capturedAt")]
     created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
     updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class CaptureSessionMediaOriginal(WireModel):
+    """
+    Inline object hoisted from CaptureSession.media[].original.
+    """
+
+    file_id: Annotated[str, Field(alias="fileId")]
+    same_size: Annotated[bool, Field(alias="sameSize")]
 
 
 class CaptureSessionMediaProvenance(WireModel):
@@ -1132,6 +1201,9 @@ class DeviceStatus(WireModel):
     model_config = ConfigDict(
         extra="allow",
     )
+
+
+type FixedAxisIndicesAdditionalProperty = Annotated[int, Field(ge=0, le=9007199254740991)]
 
 
 class ManualActionDryRun(WireModel):
@@ -1250,9 +1322,19 @@ class MediaAsset(WireModel):
     capture_parameters: Annotated[dict[str, Any] | None, Field(alias="captureParameters")]
     quality_metrics: Annotated[dict[str, Any] | None, Field(alias="qualityMetrics")]
     metadata: Annotated[dict[str, Any] | None, Field(...)]
+    original: MediaAssetOriginal | None = None
     captured_at: Annotated[AwareDatetime | None, Field(alias="capturedAt")]
     created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
     updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class MediaAssetOriginal(WireModel):
+    """
+    Inline object hoisted from MediaAsset.original.
+    """
+
+    file_id: Annotated[str, Field(alias="fileId")]
+    same_size: Annotated[bool, Field(alias="sameSize")]
 
 
 class MediaAssetPresignedUrl(WireModel):
@@ -1301,6 +1383,523 @@ class Organization(WireModel):
     deleted_at: Annotated[AwareDatetime | None, Field(alias="deletedAt")] = None
     created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
     updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class PhenosSession(WireModel):
+    """
+    Wire model for OpenAPI component ExternalToolGatewaySessionDto.
+    """
+
+    session_id: Annotated[str, Field(alias="sessionId")]
+    organization_id: Annotated[str, Field(alias="organizationId", min_length=1)]
+    user_id: Annotated[str, Field(alias="userId", min_length=1)]
+    client_name: Annotated[str, Field(alias="clientName", max_length=64, min_length=1)]
+    references: PhenosSessionReferences
+    operations: Annotated[list[str], Field(min_length=1)]
+    status: str
+    tool_calls_started: Annotated[int, Field(alias="toolCallsStarted", ge=0, le=9007199254740991)]
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    expires_at: Annotated[AwareDatetime, Field(alias="expiresAt")]
+    sandbox_deadline_at: Annotated[AwareDatetime | None, Field(alias="sandboxDeadlineAt")]
+
+
+class PhenosSessionCreation(WireModel):
+    """
+    Wire model for OpenAPI component CreateExternalToolGatewaySessionResponseDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    session: PhenosSessionCreationSession
+    credential: PhenosSessionCreationCredential
+
+
+class PhenosSessionCreationCredential(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.credential.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    token: Annotated[str, Field(min_length=1)]
+    expires_at: Annotated[AwareDatetime, Field(alias="expiresAt")]
+
+
+class PhenosSessionCreationSession(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.
+    """
+
+    session_id: Annotated[str, Field(alias="sessionId")]
+    organization_id: Annotated[str, Field(alias="organizationId", min_length=1)]
+    user_id: Annotated[str, Field(alias="userId", min_length=1)]
+    client_name: Annotated[str, Field(alias="clientName", max_length=64, min_length=1)]
+    references: PhenosSessionCreationSessionReferences
+    operations: Annotated[list[str], Field(min_length=1)]
+    status: str
+    tool_calls_started: Annotated[int, Field(alias="toolCallsStarted", ge=0, le=9007199254740991)]
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    expires_at: Annotated[AwareDatetime, Field(alias="expiresAt")]
+    sandbox_deadline_at: Annotated[AwareDatetime | None, Field(alias="sandboxDeadlineAt")]
+
+
+class PhenosSessionCreationSessionReferences(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.
+    """
+
+    image: PhenosSessionCreationSessionReferencesImage
+    annotations: Annotated[list[PhenosSessionCreationSessionReferencesAnnotation], Field(max_length=3)]
+
+
+class PhenosSessionCreationSessionReferencesAnnotation(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.annotations[].
+    """
+
+    id: str
+    revision: Annotated[int, Field(ge=0, le=9007199254740991)]
+    geometry_fingerprint: Annotated[str, Field(alias="geometryFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+
+
+class PhenosSessionCreationSessionReferencesImage(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.
+    """
+
+    id: str
+    revision: Annotated[str, Field(max_length=128, min_length=1)]
+    source_binding: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBinding | None,
+        Field(alias="sourceBinding"),
+    ] = None
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBinding(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    source_id: Annotated[str, Field(alias="sourceId")]
+    file_id: Annotated[str, Field(alias="fileId")]
+    file_sha256: Annotated[str, Field(alias="fileSha256", pattern="^sha256:[0-9a-f]{64}$")]
+    revision: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    plane: PhenosSessionCreationSessionReferencesImageSourceBindingPlane
+    coordinate_system: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystem,
+        Field(alias="coordinateSystem"),
+    ]
+    grid: (
+        PhenosSessionCreationSessionReferencesImageSourceBindingGridExifApplied
+        | PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlane
+    )
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystem(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.
+    """
+
+    coordinate_system_id: Annotated[str, Field(alias="coordinateSystemId", min_length=1)]
+    source_id: Annotated[str, Field(alias="sourceId", min_length=1)]
+    source_revision: Annotated[str, Field(alias="sourceRevision", min_length=1)]
+    dimension_fingerprint: Annotated[str, Field(alias="dimensionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    level: Literal[0]
+    grid: str
+    dimensions: PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemDimensions
+    axes: PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxes
+    pixel_origin: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin,
+        Field(alias="pixelOrigin"),
+    ]
+    angle_convention: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAngleConvention,
+        Field(alias="angleConvention"),
+    ]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAngleConvention(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.angleConvention.
+    """
+
+    reference_axis: Annotated[str, Field(alias="referenceAxis")]
+    positive_direction: Annotated[str, Field(alias="positiveDirection")]
+    unit: str
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxes(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes.
+    """
+
+    x: PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesX
+    y: PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesY
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesX(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes.x.
+    """
+
+    name: Annotated[str, Field(min_length=1)]
+    direction: str
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesY(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.axes.y.
+    """
+
+    name: Annotated[str, Field(min_length=1)]
+    direction: str
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.dimensions.
+    """
+
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.coordinateSystem.pixelOrigin.
+    """
+
+    corner: str
+    sample_position: Annotated[str, Field(alias="samplePosition")]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingGridExifApplied(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:ExifApplied>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    stored_dimensions: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions,
+        Field(alias="storedDimensions"),
+    ]
+    orientation: Annotated[int, Field(ge=1, le=8)]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:ExifApplied>.storedDimensions.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlane(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    dataset_path: Annotated[str, Field(alias="datasetPath", max_length=1024, min_length=2, pattern="^\\/.*")]
+    dimensions: PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneDimensions
+    shape: Annotated[list[int], Field(max_length=16, min_length=2)]
+    dtype: Annotated[str, Field(pattern="^[<>|]?[bhiuqefdBHIQ]\\d*$")]
+    axes: Annotated[
+        list[PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneAxe],
+        Field(max_length=16, min_length=2),
+    ]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneAxe(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>.axes[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(min_length=1)]
+    direction: Annotated[str, Field(min_length=1)]
+    cardinality: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.grid.<oneOf:NativePlane>.dimensions.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingPlane(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.plane.
+    """
+
+    coordinate_system_id: Annotated[str, Field(alias="coordinateSystemId", min_length=1)]
+    source_revision: Annotated[str, Field(alias="sourceRevision", min_length=1)]
+    dimension_fingerprint: Annotated[str, Field(alias="dimensionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    level: Literal[0]
+    axis_selection: Annotated[
+        PhenosSessionCreationSessionReferencesImageSourceBindingPlaneAxisSelection,
+        Field(alias="axisSelection"),
+    ]
+
+
+class PhenosSessionCreationSessionReferencesImageSourceBindingPlaneAxisSelection(WireModel):
+    """
+    Inline object hoisted from PhenosSessionCreation.session.references.image.sourceBinding.plane.axisSelection.
+    """
+
+    x_axis_name: Annotated[str, Field(alias="xAxisName", min_length=1)]
+    y_axis_name: Annotated[str, Field(alias="yAxisName", min_length=1)]
+    fixed_axis_indices: Annotated[dict[str, FixedAxisIndicesAdditionalProperty], Field(alias="fixedAxisIndices")]
+
+
+class PhenosSessionReferences(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.
+    """
+
+    image: PhenosSessionReferencesImage
+    annotations: Annotated[list[PhenosSessionReferencesAnnotation], Field(max_length=3)]
+
+
+class PhenosSessionReferencesAnnotation(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.annotations[].
+    """
+
+    id: str
+    revision: Annotated[int, Field(ge=0, le=9007199254740991)]
+    geometry_fingerprint: Annotated[str, Field(alias="geometryFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+
+
+class PhenosSessionReferencesImage(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.
+    """
+
+    id: str
+    revision: Annotated[str, Field(max_length=128, min_length=1)]
+    source_binding: Annotated[PhenosSessionReferencesImageSourceBinding | None, Field(alias="sourceBinding")] = None
+
+
+class PhenosSessionReferencesImageSourceBinding(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    source_id: Annotated[str, Field(alias="sourceId")]
+    file_id: Annotated[str, Field(alias="fileId")]
+    file_sha256: Annotated[str, Field(alias="fileSha256", pattern="^sha256:[0-9a-f]{64}$")]
+    revision: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    plane: PhenosSessionReferencesImageSourceBindingPlane
+    coordinate_system: Annotated[
+        PhenosSessionReferencesImageSourceBindingCoordinateSystem,
+        Field(alias="coordinateSystem"),
+    ]
+    grid: (
+        PhenosSessionReferencesImageSourceBindingGridExifApplied
+        | PhenosSessionReferencesImageSourceBindingGridNativePlane
+    )
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystem(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.
+    """
+
+    coordinate_system_id: Annotated[str, Field(alias="coordinateSystemId", min_length=1)]
+    source_id: Annotated[str, Field(alias="sourceId", min_length=1)]
+    source_revision: Annotated[str, Field(alias="sourceRevision", min_length=1)]
+    dimension_fingerprint: Annotated[str, Field(alias="dimensionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    level: Literal[0]
+    grid: str
+    dimensions: PhenosSessionReferencesImageSourceBindingCoordinateSystemDimensions
+    axes: PhenosSessionReferencesImageSourceBindingCoordinateSystemAxes
+    pixel_origin: Annotated[
+        PhenosSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin,
+        Field(alias="pixelOrigin"),
+    ]
+    angle_convention: Annotated[
+        PhenosSessionReferencesImageSourceBindingCoordinateSystemAngleConvention,
+        Field(alias="angleConvention"),
+    ]
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemAngleConvention(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.angleConvention.
+    """
+
+    reference_axis: Annotated[str, Field(alias="referenceAxis")]
+    positive_direction: Annotated[str, Field(alias="positiveDirection")]
+    unit: str
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemAxes(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.axes.
+    """
+
+    x: PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesX
+    y: PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesY
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesX(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.axes.x.
+    """
+
+    name: Annotated[str, Field(min_length=1)]
+    direction: str
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesY(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.axes.y.
+    """
+
+    name: Annotated[str, Field(min_length=1)]
+    direction: str
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.dimensions.
+    """
+
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.coordinateSystem.pixelOrigin.
+    """
+
+    corner: str
+    sample_position: Annotated[str, Field(alias="samplePosition")]
+
+
+class PhenosSessionReferencesImageSourceBindingGridExifApplied(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.grid.<oneOf:ExifApplied>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    stored_dimensions: Annotated[
+        PhenosSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions,
+        Field(alias="storedDimensions"),
+    ]
+    orientation: Annotated[int, Field(ge=1, le=8)]
+
+
+class PhenosSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.grid.<oneOf:ExifApplied>.storedDimensions.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionReferencesImageSourceBindingGridNativePlane(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    dataset_path: Annotated[str, Field(alias="datasetPath", max_length=1024, min_length=2, pattern="^\\/.*")]
+    dimensions: PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions
+    shape: Annotated[list[int], Field(max_length=16, min_length=2)]
+    dtype: Annotated[str, Field(pattern="^[<>|]?[bhiuqefdBHIQ]\\d*$")]
+    axes: Annotated[
+        list[PhenosSessionReferencesImageSourceBindingGridNativePlaneAxe],
+        Field(max_length=16, min_length=2),
+    ]
+
+
+class PhenosSessionReferencesImageSourceBindingGridNativePlaneAxe(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.axes[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(min_length=1)]
+    direction: Annotated[str, Field(min_length=1)]
+    cardinality: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.dimensions.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    width: Annotated[int, Field(gt=0, le=9007199254740991)]
+    height: Annotated[int, Field(gt=0, le=9007199254740991)]
+
+
+class PhenosSessionReferencesImageSourceBindingPlane(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.plane.
+    """
+
+    coordinate_system_id: Annotated[str, Field(alias="coordinateSystemId", min_length=1)]
+    source_revision: Annotated[str, Field(alias="sourceRevision", min_length=1)]
+    dimension_fingerprint: Annotated[str, Field(alias="dimensionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    level: Literal[0]
+    axis_selection: Annotated[
+        PhenosSessionReferencesImageSourceBindingPlaneAxisSelection,
+        Field(alias="axisSelection"),
+    ]
+
+
+class PhenosSessionReferencesImageSourceBindingPlaneAxisSelection(WireModel):
+    """
+    Inline object hoisted from PhenosSession.references.image.sourceBinding.plane.axisSelection.
+    """
+
+    x_axis_name: Annotated[str, Field(alias="xAxisName", min_length=1)]
+    y_axis_name: Annotated[str, Field(alias="yAxisName", min_length=1)]
+    fixed_axis_indices: Annotated[dict[str, FixedAxisIndicesAdditionalProperty], Field(alias="fixedAxisIndices")]
 
 
 class Rule(WireModel):
@@ -2175,6 +2774,7 @@ SpotGroup.model_rebuild()
 G3_OPERATION_ALLOWLIST = frozenset(
     {
         ("DELETE", "/api/v1/agents/management/{id}/access-keys/{keyId}"),
+        ("DELETE", "/api/v1/tool-gateway/sessions/{sessionId}"),
         ("GET", "/api/v1/actions/executions"),
         ("GET", "/api/v1/actions/executions/batch"),
         ("GET", "/api/v1/actions/executions/{id}"),
@@ -2211,6 +2811,7 @@ G3_OPERATION_ALLOWLIST = frozenset(
         ("GET", "/api/v1/spots/{spotId}/rules"),
         ("GET", "/api/v1/spots/{spotId}/rules/{id}"),
         ("GET", "/api/v1/spots/{spotId}/rules/{id}/executions"),
+        ("GET", "/api/v1/tool-gateway/sessions/{sessionId}"),
         ("POST", "/api/v1/actions/executions/manual"),
         ("POST", "/api/v1/actions/executions/preview"),
         ("POST", "/api/v1/agents/device/action-executions"),
@@ -2234,11 +2835,13 @@ G3_OPERATION_ALLOWLIST = frozenset(
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/complete"),
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/fail"),
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/start"),
+        ("POST", "/api/v1/artifacts/{artifactId}/open"),
         ("POST", "/api/v1/media/assets/complete-image-upload"),
         ("POST", "/api/v1/media/assets/upload-image"),
         ("POST", "/api/v1/media/assets/zarr/complete"),
         ("POST", "/api/v1/media/assets/zarr/upload"),
         ("POST", "/api/v1/spots"),
+        ("POST", "/api/v1/tool-gateway/sessions"),
     }
 )
 
@@ -2260,6 +2863,7 @@ __all__ = [
     "AgentCaptureSession",
     "AgentImageUpload",
     "AgentImageUploadComplete",
+    "ArtifactDownload",
     "BandProvenance",
     "BandProvenanceBandInterpretation",
     "BandProvenanceBandInterpretationBandApprovedProfile",
@@ -2299,10 +2903,12 @@ __all__ = [
     "CaptureSessionDetail",
     "CaptureSessionDetailDevice",
     "CaptureSessionDetailMedia",
+    "CaptureSessionDetailMediaOriginal",
     "CaptureSessionDetailMediaProvenance",
     "CaptureSessionDetailMediaProvenanceActor",
     "CaptureSessionDetailSpot",
     "CaptureSessionMedia",
+    "CaptureSessionMediaOriginal",
     "CaptureSessionMediaProvenance",
     "CaptureSessionMediaProvenanceActor",
     "CaptureSessionSpot",
@@ -2322,10 +2928,51 @@ __all__ = [
     "ManualActionDryRunChecksScope",
     "ManualActionExecution",
     "MediaAsset",
+    "MediaAssetOriginal",
     "MediaAssetPresignedUrl",
     "MediaAssetProvenance",
     "MediaAssetProvenanceActor",
     "Organization",
+    "PhenosSession",
+    "PhenosSessionCreation",
+    "PhenosSessionCreationCredential",
+    "PhenosSessionCreationSession",
+    "PhenosSessionCreationSessionReferences",
+    "PhenosSessionCreationSessionReferencesAnnotation",
+    "PhenosSessionCreationSessionReferencesImage",
+    "PhenosSessionCreationSessionReferencesImageSourceBinding",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystem",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAngleConvention",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxes",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesX",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemAxesY",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemDimensions",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingGridExifApplied",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlane",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneAxe",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingGridNativePlaneDimensions",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingPlane",
+    "PhenosSessionCreationSessionReferencesImageSourceBindingPlaneAxisSelection",
+    "PhenosSessionReferences",
+    "PhenosSessionReferencesAnnotation",
+    "PhenosSessionReferencesImage",
+    "PhenosSessionReferencesImageSourceBinding",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystem",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemAngleConvention",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemAxes",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesX",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemAxesY",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemDimensions",
+    "PhenosSessionReferencesImageSourceBindingCoordinateSystemPixelOrigin",
+    "PhenosSessionReferencesImageSourceBindingGridExifApplied",
+    "PhenosSessionReferencesImageSourceBindingGridExifAppliedStoredDimensions",
+    "PhenosSessionReferencesImageSourceBindingGridNativePlane",
+    "PhenosSessionReferencesImageSourceBindingGridNativePlaneAxe",
+    "PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions",
+    "PhenosSessionReferencesImageSourceBindingPlane",
+    "PhenosSessionReferencesImageSourceBindingPlaneAxisSelection",
     "Rule",
     "RuleAction",
     "RuleActionActionDefinition",

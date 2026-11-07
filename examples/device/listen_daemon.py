@@ -6,12 +6,12 @@
 every action on one worker thread, first accepted first run. The scheduler thread here only asks that executor for a
 capture with ``device.submit()``; it never calls the Hub itself, so a command and a scheduled capture never drive the
 camera at once and nothing reaches the Hub after ``listen()`` signs off. Keep the schedule in this process: a second
-process with the same key re-discovers and cuts this one's session (python-sdk INV-11). SIGTERM or SIGINT winds
+process with the same key re-discovers and cuts this one's session. SIGTERM or SIGINT winds
 ``listen()`` down and exits 0; an error a restart cannot fix exits 10, which listen_daemon.service never restarts.
 
 Needs ``pip install 'phytoworks[device]'`` and ``PWS_MQTT_URL`` (``mqtts://host:443``). ``PWS_BASE_URL`` defaults to the
-production Hub; set it for any other Hub. The dev Hub is ``http://localhost:15004/api/v1`` through an SSH tunnel to the
-dev machine: credentials go over plain HTTP only to loopback (python-sdk device-listen-operations.md, dev stack).
+production Hub; set it for any other Hub. A development Hub on another machine is reached through a tunnel (for
+example SSH) at ``http://localhost:15004/api/v1``: credentials go over plain HTTP only to loopback.
 """
 
 from __future__ import annotations

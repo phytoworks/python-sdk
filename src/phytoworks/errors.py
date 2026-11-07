@@ -218,7 +218,7 @@ def error_from_http(
 
 
 def _status_only(error: PWSError, what: str) -> PWSError:
-    """``error``'s class and HTTP status only: a body, code, request id or cause may echo a secret (INV-10, INV-11).
+    """``error``'s class and HTTP status only: a body, code, request id or cause may echo a secret.
 
     Raise the result outside the ``except`` block so the original is not kept as ``__context__`` either.
     """

@@ -13,7 +13,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 from ._transport import AsyncTransport, Transport
-from .config import require_secure_hub
+from .config import require_header_safe_secret, require_secure_hub
 from .errors import AuthError
 
 
@@ -36,13 +36,11 @@ class ApiKeyCredential:
     The JWT that ``POST /agents/device/self-discovery`` returns authenticates
     ``/agents/*`` routes only.  Operator routes such as ``/organizations`` or
     ``/media/capture-sessions`` are guarded by Better Auth and answer 401 to
-    it -- sign in with ``pws auth login`` (a device session) for those until a
-    server-side operator key exists (Phase 2).
+    it -- sign in with ``pws auth login`` (a device session) for those.
     """
 
     def __init__(self, api_key: str) -> None:
-        if not api_key.strip():
-            raise ValueError("api_key must not be empty")
+        require_header_safe_secret(api_key, "api_key")
         self._api_key = api_key
         self._access_token: str | None = None
         self.expires_at: datetime | None = None
@@ -147,8 +145,7 @@ class SessionCredential:
     """
 
     def __init__(self, *, session_token: str, _logger: logging.Logger | None = None) -> None:
-        if not session_token.strip():
-            raise ValueError("session_token must not be empty")
+        require_header_safe_secret(session_token, "session_token")
         self._session_token = session_token
         self._access_token: str | None = None
         self._expires_at: datetime | None = None

@@ -13,8 +13,8 @@ StartLimitBurst=5
 [Service]
 Type=simple
 User=camera
-# The SDK targets the production Hub by default; set PWS_BASE_URL only for another Hub. The dev Hub is reached
-# through an SSH tunnel to the dev machine; plain HTTP goes only to localhost (device-listen-operations.md, dev stack):
+# The SDK targets the production Hub by default; set PWS_BASE_URL only for another Hub. A development Hub on
+# another machine is reached through a tunnel (for example SSH); plain HTTP goes only to localhost:
 #Environment=PWS_BASE_URL=http://localhost:15004/api/v1
 # Production broker: MQTTS on :443. The port is required; the SDK refuses a broker URL without one.
 # The dev broker replaces this line: PWS_MQTT_URL=mqtts://localhost:15884 plus PWS_MQTT_CA_FILE=<the dev CA file>.
@@ -31,7 +31,6 @@ RestartPreventExitStatus=10
 # included) spends its 25 s per call and the last shutdown-notify its 3 s. Not counted: a Hub trickling a response,
 # the worker's key exchange at the stop. A kill can leave session settlement, results, the sign-off and the notify to
 # the Hub; its 300 s lease then marks it offline.
-# Derivation: docs/entities/python-sdk/reference/device-listen-operations.md (stop signal and budget section).
 KillSignal=SIGTERM
 KillMode=mixed
 TimeoutStopSec=240

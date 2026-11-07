@@ -1,14 +1,11 @@
-"""Device action executor (M5a-3, L1, L2, L4d): Hub commands, cancels and manual-mode syncs in, action results out, and
+"""Device action executor: Hub commands, cancels and manual-mode syncs in, action results out, and
 local :meth:`~phytoworks.device.Device.submit` items on the same queue, all run from one action table. A local run of
 an action declared to the Hub leaves a device action record (HTTP) and its current value (``results/batch``).
 
 The thread that calls :meth:`phytoworks.device.Device.listen` is the supervisor and the only one that
 touches the broker connection; one worker thread runs each item's action handler for both doors, first
 accepted first run. Liveness stays the HTTP heartbeat (no MQTT ``status`` or ``shutdown`` is ever published),
-and the heartbeat drops ``commandChannel: "none"`` only while the subscription stands. Design and the facts
-behind each rule: docs/plan/2026-08-06-sdk-cli-skills/field-capture-modalities/2026-10-07-m5a3-mqtt-loop-redesign.md
-and 2026-10-11-device-action-executor-design.md in the same folder; records, current values and the declaration:
-2026-10-12-device-action-l4-design.md §2-§4.
+and the heartbeat drops ``commandChannel: "none"`` only while the subscription stands.
 """
 
 from __future__ import annotations
@@ -59,7 +56,7 @@ TAKEOVER_WINDOW = 30.0
 RESULT_RETENTION = 60.0
 OUTBOX_LIMIT = 8  # items held at once, both doors (queued, running, or a Hub result awaiting PUBACK or retention)
 FLUSH_DEADLINE = 10.0
-# Local action records (L4 design §2): held for the Hub oldest first, sent one request per tick, as many as fit the
+# Local action records: held for the Hub oldest first, sent one request per tick, as many as fit the
 # Hub's per-request limits; agent-rs's retry policy (1, 2, 4 s; four attempts), then dropped.
 RECORD_LIMIT = 32  # records the Hub has not taken, the chunk being sent included; a newer one pushes the oldest out
 RECORD_CHUNK = 50  # records per request
@@ -106,7 +103,7 @@ class PahoLink:
     """A fresh paho-mqtt 2.x client per attempt: MQTT 5, VERSION2 callbacks, clean start, no session expiry.
 
     paho's own reconnect and its in-flight QoS 1 queue die with this object; the loop's outbox is the only
-    thing that republishes (redesign fact 13). ``loop_start``/``connect_async`` are never used (fact 7).
+    thing that republishes. ``loop_start``/``connect_async`` are never used.
     """
 
     def __init__(self, client_id: str) -> None:
@@ -358,7 +355,7 @@ class _Entry:
 
 @dataclass(slots=True)
 class _Queue:
-    """What the supervisor owes the Hub on one route, oldest first (executor design D6): one request per tick, at most
+    """What the supervisor owes the Hub on one route, oldest first: one request per tick, at most
     ``chunk(items)`` of the oldest items, the same ones again on every retry (but for those the cap pushes out), then
     ``period`` seconds before the next chunk starts. Both instances -- local action records and telemetry -- are written
     only under the outbox lock; ``waits_on_429`` says a 429 holds the chunk for its ``Retry-After`` instead of dropping it."""
@@ -461,7 +458,7 @@ class Supervisor:
         try:
             self._serve(endpoint, slot)
         except (SessionTakenOver, CredentialRevoked):
-            sign_off = False  # the lease is another process's now, or the key is gone (design D6)
+            sign_off = False  # the lease is another process's now, or the key is gone
             raise
         finally:
             self._shutdown(sign_off=sign_off)
@@ -555,7 +552,7 @@ class Supervisor:
             return
         if len(granted) < 2 or any(code >= 0x80 for code in granted[:2]):
             raise SubscribeDenied(f"the broker refused this device's command topics (SUBACK {granted})")
-        # A refused manual-mode/sync is not fatal: every successful heartbeat still carries the mode (design §8).
+        # A refused manual-mode/sync is not fatal: every successful heartbeat still carries the mode.
         self._subscribed = True  # the next tick opens the channel
         while not self._device._stop_requested:
             self._pump(LOOP_STEP)
@@ -574,7 +571,7 @@ class Supervisor:
             self._quick_kicks = 0
 
     def _rediscover(self, slot: MqttSlot) -> MqttSlot:
-        """Refused credentials: re-discover for a fresh slot at most once per cooldown (redesign §2 F4), the one the
+        """Refused credentials: re-discover for a fresh slot at most once per cooldown, the one the
         Device shares with its HTTP 401 path; inside it, the cached slot. A key the Hub already refused on that path ends
         the loop at once instead of waiting the cooldown out (a flag set once until the next adoption, read unlocked)."""
 
@@ -955,7 +952,7 @@ class Supervisor:
         if entry.session is not None:
             return entry.session
         name = ctx.params.get("sessionName")
-        if entry.run is not None:  # a local run is no Hub execution: the session names none (design D4)
+        if entry.run is not None:  # a local run is no Hub execution: the session names none
             default, linked = f"Local capture {entry.execution_id[:8]}", None
         else:
             default, linked = f"Remote capture {entry.execution_id[:8]}", entry.execution_id
@@ -1024,7 +1021,7 @@ class Supervisor:
         if entry.session:
             self._device._forget(entry.session)
         error = None if status == "SUCCESS" else error
-        if entry.action_def_id and status != "SKIPPED":  # a declared action's run (design §2, Q1: no SKIPPED rows)
+        if entry.action_def_id and status != "SKIPPED":  # a declared action's run: no SKIPPED rows
             self._keep(entry, status, error)
         entry.run._end(RunResult(status, error, entry.session))
 
@@ -1085,7 +1082,7 @@ class Supervisor:
         entry.acked_at, entry.published_on, entry.mid = None, None, None
 
     def _flush(self) -> None:
-        """Publish every result not yet sent on this connection; only after SUBACK (redesign §2 F3). Local current
+        """Publish every result not yet sent on this connection; only after SUBACK. Local current
         values go out once, as agent-rs's ``results/batch`` (QoS 1, no retry); with no subscribed link they are dropped
         (a current value is not history)."""
 
@@ -1143,7 +1140,7 @@ class Supervisor:
 
     def _shutdown(self, *, sign_off: bool) -> None:
         """Close both doors, cancel queued work, give the running capture its grace, flush, disconnect, then sign
-        off and retire the Device in one step (design D5); after a takeover or a revoked key, or with a request still
+        off and retire the Device in one step; after a takeover or a revoked key, or with a request still
         under way ``stop_grace`` seconds into retirement, retire only."""
 
         with self._queued:  # no door admits once this section ends
@@ -1218,7 +1215,7 @@ def _body(entry: _Entry, status: str, error: str | None) -> bytes:
 
 
 def _batch_body(agent: str, values: list[dict[str, Any]]) -> bytes:
-    """agent-rs's batch envelope; ``deviceId`` is the agent id, the one the topic names (L4 design §3)."""
+    """agent-rs's batch envelope; ``deviceId`` is the agent id, the one the topic names."""
 
     body = {"deviceId": agent, "batchType": "LOCAL", "results": values, "timestamp": _stamp(datetime.now(UTC))}
     return json.dumps(body, separators=(",", ":")).encode()

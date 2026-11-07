@@ -165,7 +165,7 @@ def prepare_depth(  # noqa: C901 - validation, local Zarr proof, and preview sha
 
     group = zarr.open_group(str(root), mode="w", zarr_format=3)
     array_name = _array_path(policy)
-    # Uncompressed: Hub admits no compressor for user stores (media INV-11).
+    # Uncompressed: Hub admits no compressor for user stores.
     group.create_array(array_name, data=pixels, compressors=None)
     try:
         reopened = np.asarray(_zarr_storage.open_bounded_array(root, array_name)[:])
@@ -252,7 +252,7 @@ def prepare_thermal(array: object, root: Path) -> tuple[Path, int, int, str, int
     # Explicit intermediate group: Hub's native layout check wants every non-array node a group.
     parent, _, leaf = array_name.rpartition("/")
     group = zarr.open_group(str(root), mode="w", zarr_format=3).create_group(parent)
-    # Uncompressed: Hub admits no compressor for user stores (media INV-11).
+    # Uncompressed: Hub admits no compressor for user stores.
     group.create_array(leaf, data=raw, compressors=None)
     try:
         reopened = np.asarray(_zarr_storage.open_bounded_array(root, array_name)[:])

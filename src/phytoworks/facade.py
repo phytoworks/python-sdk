@@ -946,7 +946,7 @@ class ComponentResource:
 
 
 class AccessKeyResource:
-    """An agent's device API keys: the six G3-approved routes (identity plan D14), no update or hard delete.
+    """An agent's device API keys: the six approved routes, no update or hard delete.
 
     The secret comes back only as :class:`pydantic.SecretStr`; ``key`` metadata never carries it.
     """
@@ -1672,6 +1672,14 @@ class PWS:
         organizations = list(self.organizations.for_user(user_id))
         return Identity(user_id, credential.user_email, credential.expires_at, organizations)
 
+    def my_organizations(self) -> Page[Organization]:
+        """The organizations this session's user belongs to. Any member can read this; ``organizations.list`` is the
+        admin listing of every organization."""
+
+        credential = _session_credential(self._credential)
+        self._ensure_auth()
+        return self.organizations.for_user(_session_user_id(credential))
+
     def access_info(self) -> AccessInfo:
         """Read this session's access summary for the selected organization."""
 
@@ -1730,7 +1738,7 @@ class PWS:
             return self._raw_request(operation.spec.method, operation.path, params=params)
         except PWSError as exc:
             error = _public_error(operation, exc)
-        raise error  # outside the handler, so a key route's raw failure is not chained (INV-10)
+        raise error  # outside the handler, so a key route's raw failure is not chained
 
     def _send[ModelT: BaseModel](self, operation: BoundOperation[ModelT], body: Mapping[str, object]) -> object:
         try:
@@ -2839,6 +2847,13 @@ class AsyncPWS:
         organizations = [item async for item in await self.organizations.for_user(user_id)]
         return Identity(user_id, credential.user_email, credential.expires_at, organizations)
 
+    async def my_organizations(self) -> Page[Organization]:
+        """Async equivalent of :meth:`PWS.my_organizations`."""
+
+        credential = _session_credential(self._credential)
+        await self._ensure_auth()
+        return await self.organizations.for_user(_session_user_id(credential))
+
     async def access_info(self) -> AccessInfo:
         """Async equivalent of :meth:`PWS.access_info`."""
 
@@ -3371,7 +3386,7 @@ def _spot_body(name: str, slug: str, description: str | None) -> dict[str, objec
 
 
 def _access_key_body(name: str | None, description: str | None, expires_at: datetime | str | None) -> dict[str, object]:
-    """Send only what the caller set: a rotate that names an expiry must match the old one (identity plan D5)."""
+    """Send only what the caller set: a rotate that names an expiry must match the old one."""
 
     body: dict[str, object] = {}
     if name is not None:
@@ -3420,7 +3435,7 @@ def _public_error[ModelT: BaseModel](operation: BoundOperation[ModelT], error: P
 
 
 def _refuse_access_key_path(path: str) -> None:
-    """Keep ``raw`` off the key routes (D14 and INV-10), however the path is spelled.
+    """Keep ``raw`` off the key routes , however the path is spelled.
 
     Only path segments count. The query and fragment go first, on the raw string, so an encoded ``%3F`` cannot hide
     a later segment; the rest is decoded until stable, lower-cased and split on ``/`` with ``;`` parameters dropped.

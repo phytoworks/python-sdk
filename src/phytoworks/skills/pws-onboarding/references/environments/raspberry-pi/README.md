@@ -1,6 +1,6 @@
 # Raspberry Pi 4B (aarch64)
 
-Verified on a Raspberry Pi 4B (aarch64, Python 3.13.5) in October 2026 (GitHub #329):
+Verified on a Raspberry Pi 4B (aarch64, Python 3.13.5) in October 2026:
 
 - `Device.listen()` ran and the agent showed online.
 - After a key rotation the old key was refused (401).

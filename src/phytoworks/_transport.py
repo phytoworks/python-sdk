@@ -38,6 +38,10 @@ ProgressCallback = Callable[[int, int | None], None]
 """``on_progress(bytes_done, total_bytes_or_None)`` invoked after every written chunk."""
 
 
+class TimeBudgetError(TransportError):
+    """A request under a time budget (``Transport.time_left``) could not start an attempt or a retry pause inside it."""
+
+
 @dataclass(frozen=True, slots=True)
 class Pagination:
     page: int | None = None
@@ -312,9 +316,28 @@ class Transport:
         self.user_agent = user_agent if user_agent is not None else _default_user_agent()
         self._client = client or httpx.Client(timeout=timeout)
         self._owns_client = client is None
+        # Seconds left of a caller's time budget, or None. While set, each attempt's HTTPX timeout is capped at it and
+        # no retry or back-off (a 429's Retry-After included) or credential-refresh wait starts that would reach its
+        # end. HTTPX timeouts bound each network wait, not a whole response: an answer already arriving can finish
+        # after the budget ends.
+        self.time_left: Callable[[], float] | None = None
 
     def __repr__(self) -> str:
         return f"Transport(base_url={self.base_url!r}, timeout={self.timeout!r}, max_retries={self.max_retries!r})"
+
+    def ensure_time_for(self, delay: float) -> None:
+        """Refuse a pause of ``delay`` seconds that would reach the end of the time budget."""
+
+        if self.time_left is not None and delay >= self.time_left():
+            raise TimeBudgetError("the time budget ends before this request could be retried")
+
+    def _attempt_timeout(self) -> float | httpx.Timeout:
+        if self.time_left is None:
+            return self.timeout
+        left = self.time_left()
+        if left <= 0:
+            raise TimeBudgetError("the time budget ended before this request")
+        return min(self.timeout, left) if isinstance(self.timeout, int | float) else left
 
     def request_raw(
         self,
@@ -335,7 +358,7 @@ class Transport:
                     headers=request_headers,
                     params=cast(QueryParamTypes | None, params),
                     json=json_body,
-                    timeout=self.timeout,
+                    timeout=self._attempt_timeout(),
                     follow_redirects=False,
                 )
             except httpx.HTTPError as exc:
@@ -346,9 +369,9 @@ class Transport:
             if response.status_code == 429:
                 retry_after = _parse_retry_after(response.headers.get("Retry-After"))
                 if _is_retryable_method(method) and attempt < self.max_retries:
-                    time.sleep(
-                        _rate_limited(retry_after if retry_after is not None else self.retry_backoff * (2**attempt))
-                    )
+                    delay = retry_after if retry_after is not None else self.retry_backoff * (2**attempt)
+                    self.ensure_time_for(delay)
+                    time.sleep(_rate_limited(delay))
                     continue
             if _is_retryable_method(method) and response.status_code >= 500 and attempt < self.max_retries:
                 self._sleep(attempt)
@@ -512,7 +535,9 @@ class Transport:
 
     def _sleep(self, attempt: int) -> None:
         if self.retry_backoff:
-            time.sleep(self.retry_backoff * (2**attempt))
+            delay = self.retry_backoff * (2**attempt)
+            self.ensure_time_for(delay)
+            time.sleep(delay)
 
     def close(self) -> None:
         if self._owns_client:

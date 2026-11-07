@@ -1,14 +1,11 @@
-"""Python side of the Zarr v3 storage adapter (media ADR 0002).
+"""Python side of the Zarr v3 storage adapter.
 
 Logical field names (``depth``, ``temperature``, ``F0``) are the public
 contract; only this module turns one into an array path inside a store, joins
 store members to local paths, and PUTs a local store under an issued prefix.
 
-The layout table mirrors ``resolveZarrFieldArrayPath`` in
-``packages/shared-types/src/domains/data/media/constants/zarr-storage-layout.ts``;
-the DEPTH array name comes from the scalar policy generated from that table.
-``tests/test_zarr_storage.py`` holds this copy to the shared vector file both
-runtimes read.
+The layout table mirrors the Hub's Zarr field-array layout; the DEPTH array name
+comes from the packaged scalar policy, which is generated from that layout.
 
 Heavy optional dependencies stay inside the functions that need them.
 """
@@ -79,10 +76,7 @@ def field_for_array_path(modality: str, array_path: str) -> str | None:
     return single[0] if single is not None and single[1] == path else None
 
 
-# Reader decode budget, mirroring ``zarr-decode-budget.ts`` in
-# ``packages/shared-types/src/domains/data/media/constants`` (media INV-11), where
-# each limit is derived. ``tests/test_zarr_storage.py`` holds this copy to the
-# shared ``zarr-decode-budget-vectors.json`` both runtimes read.
+# Reader decode budget, mirroring the limits the Hub applies to user stores.
 DECODE_MAX_AXIS = 16_384
 DECODE_MAX_SAMPLES = 64 * 1024 * 1024
 DECODE_MAX_BYTES = DECODE_MAX_SAMPLES * 4
@@ -727,7 +721,7 @@ def inspect_array_members(array_root: Path, document: dict[str, object]) -> None
 
 
 def open_bounded_array(root: Path, array_name: str) -> zarr.Array[ArrayV3Metadata]:
-    """Open only admitted physical metadata and chunks (media INV-11).
+    """Open only admitted physical metadata and chunks.
 
     Consolidated copies are ignored, metadata reads are capped, the codec chain
     is one bytes codec, and members are in-grid chunks of their decoded size.

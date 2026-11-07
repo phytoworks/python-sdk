@@ -2,34 +2,31 @@
 name: pws-onboarding
 description: Install the phytoworks SDK and pws CLI, sign in with device login, connect a device to a PhytoWorks spot and agent, and run the pilot examples. Use when someone asks to set up, log in to, or connect a device with PhytoWorks.
 license: MIT
-compatibility: Requires CPython 3.12 or newer, uv, and network access to PyPI or the monorepo; runtime acceptance is recorded separately for Claude Code and Codex.
+compatibility: Requires CPython 3.12 or newer, uv, and network access to PyPI; runtime acceptance is recorded separately for Claude Code and Codex.
 user-invocable: true
 ---
 
 # PWS Pilot Onboarding
 
-This guide installs the `phytoworks` SDK and `pws` CLI from a pinned PyPI release or, until that version is available, from the rolling monorepo checkout. It also covers Hub sign-in and the existing pilot examples. Use only an SDK source and Hub approved for your account.
+This guide installs the `phytoworks` SDK and `pws` CLI from a pinned PyPI release. It also covers Hub sign-in and the existing pilot examples. Use only an SDK source and Hub approved for your account.
 
 ## Prerequisites
 
 - CPython 3.12 or newer.
 - `uv` installed.
-- Network access to PyPI, or monorepo access for the interim rolling-checkout path below.
+- Network access to PyPI.
 - The account owner has given you the approved Hub and organization, and the SDK version to install. Keep these values for upgrades and rollback.
 
 Set the exact version you intend to install:
 
 ```bash
-SDK_VERSION=0.1.1
+SDK_VERSION=0.1.2
 ```
 
 ## Find this skill
 
-If the exact `SDK_VERSION` is on PyPI, install it from PyPI. Otherwise use the
-[interim rolling-checkout path](#interim-install-from-a-rolling-checkout) when you have monorepo
-access; read and follow the skill and README from the same `rolling` checkout you install. If the
-PyPI probe fails and monorepo access is unavailable, stop and report that the source is unknown.
-After installing the CLI, locate the packaged copy with the Python interpreter in the tool environment:
+Install the exact `SDK_VERSION` from PyPI. If the PyPI probe fails or the version is absent, stop and
+report that the source is unknown. After installing the CLI, locate the packaged copy with the Python interpreter in the tool environment:
 
 ```bash
 "$(uv tool dir)/phytoworks/bin/python" -c 'import pathlib, phytoworks; print(pathlib.Path(phytoworks.__file__).parent / "skills/pws-onboarding/SKILL.md")'
@@ -53,35 +50,12 @@ pws --version
 ```
 
 If the command succeeds but the exact version is absent, or the probe exits non-zero and its result is
-unknown, use the interim path below only when you have monorepo access. Without that access, stop and
-report that there is no verified install source. Never install an unpinned `phytoworks` package or
-`pws` package.
+unknown, stop and report that there is no verified install source. Never install an unpinned
+`phytoworks` package or `pws` package.
 
-### Interim install from a rolling checkout
+### Verify the installed CLI
 
-Use this path only when the exact pinned PyPI version is unavailable or its status cannot be checked.
-Clone `rolling`, record its commit, and install the package from that checkout:
-
-```bash
-git clone --depth 1 --single-branch --branch rolling git@github.com:phytoworks/pws.git pws
-cd pws
-SDK_SHA="$(git rev-parse HEAD)"
-uv tool install ./packages/sdk/python
-pws --version
-SDK_VERSION="$(python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("packages/sdk/python/pyproject.toml").read_text())["project"]["version"])')"
-printf 'Rolling SHA: %s\nSDK version: %s\n' "$SDK_SHA" "$SDK_VERSION"
-```
-
-Use the skill and README in this same checkout for the remaining steps. Its package files are under
-`packages/sdk/python/` (that folder's `examples/` is what the installed package ships as
-`phytoworks/examples`; the steps below read the installed copy). Record the SHA and version above; the
-installed version from `pws --version` must match `project.version` there. For a Python project, use
-this checkout as a local dependency with `uv add /path/to/pws/packages/sdk/python` and keep it
-available for future syncs.
-
-### Verify the installed CLI (both install paths)
-
-After either install path, set `SDK_PY` and verify the installed package:
+After installing, set `SDK_PY` and verify the installed package:
 
 ```bash
 SDK_PY="$(uv tool dir)/phytoworks/bin/python"
@@ -93,22 +67,19 @@ ls "$SDK_EXAMPLES" "$SDK_EXAMPLES/device"
 
 On Windows, use the tool environment's `Scripts\python.exe` instead of `bin/python`.
 
-`SDK_EXAMPLES` is the folder of runnable examples that ships inside the package (`pip install phytoworks` has it too, at `phytoworks/examples` in site-packages). Every later step that names an example reads it from there, so no step needs a monorepo checkout. Copy a file out of it before you edit it; the tool environment is not yours to modify.
+`SDK_EXAMPLES` is the folder of runnable examples that ships inside the package (`pip install phytoworks` has it too, at `phytoworks/examples` in site-packages). Every later step that names an example reads it from there, so no step needs a source checkout. Copy a file out of it before you edit it; the tool environment is not yours to modify.
 
-### Verify the selected source
+### Verify the installed version
 
-For a PyPI install, confirm the installed distribution version matches `SDK_VERSION`:
+Confirm the installed distribution version matches `SDK_VERSION`:
 
 ```bash
 "$SDK_PY" -c 'import importlib.metadata as m; print(m.version("phytoworks"))'
 ```
 
-For an interim checkout, compare `pws --version` and the checked-out `project.version` with the recorded
-rolling SHA. Do not use the current rolling tip later as a substitute for a recorded version.
+### Configure the pws-console skill
 
-### Configure the pws-console skill (both install paths)
-
-For read-only Console queries, use the [`pws-console` skill](../pws-console/SKILL.md). Copy its full folder, including the Codex sidecar, rules file, and query reference, into both agent skill roots. Install the rules separately in Codex's user `rules/` directory (`~/.codex/rules/` by default, or `$CODEX_HOME/rules/`), which [Codex loads at startup](https://developers.openai.com/codex/rules). Record the selected PyPI version or interim rolling SHA, along with copied-file hashes; repeat the copy after each SDK upgrade and restart Codex:
+For read-only Console queries, use the [`pws-console` skill](../pws-console/SKILL.md). Copy its full folder, including the Codex sidecar, rules file, and query reference, into both agent skill roots. Install the rules separately in Codex's user `rules/` directory (`~/.codex/rules/` by default, or `$CODEX_HOME/rules/`), which [Codex loads at startup](https://developers.openai.com/codex/rules). Record the selected PyPI version and the copied-file hashes; repeat the copy after each SDK upgrade and restart Codex. The rules file makes Codex ask for approval before every `pws` command and lets `pws-console-read` run without asking, so approve the `pws` commands this skill has shown the person and nothing else:
 
 ```bash
 SDK_PY="$(uv tool dir)/phytoworks/bin/python"
@@ -123,9 +94,7 @@ find "$HOME/.claude/skills/pws-console" "$HOME/.agents/skills/pws-console" "${CO
 
 ## Use the CLI and project library in separate environments
 
-`uv tool install` installs `pws` for command-line use. For a Python application, create or enter the application's own project and add the same selected SDK source there:
-
-For a PyPI install, pin the same version in the project:
+`uv tool install` installs `pws` for command-line use. For a Python application, create or enter the application's own project and pin the same version there:
 
 ```bash
 cd ..
@@ -134,20 +103,11 @@ cd my-pws-project
 uv add "phytoworks==${SDK_VERSION}"
 ```
 
-For the interim source, use the local checkout path instead:
-
-```bash
-uv add /path/to/pws/packages/sdk/python
-```
-
 The existing examples call `PWS()` and use the `default` credential profile. The setup below signs in to that same profile. For a named profile in your own project code, construct `PWS(profile="pilot")`; for CLI commands, select the profile with `--profile pilot`.
 
 ### Optional dependencies
 
-Optional dependencies must come from the same selected SDK source as the base package. For the
-interim checkout, add an extra from that checkout, for example
-`uv add --extra pandas /path/to/pws/packages/sdk/python`; use `zarr` or `device` in place of `pandas`
-for those extras. For a PyPI install, add only the needed extra at the same pinned version:
+Add only the needed extra, at the same pinned version as the base package:
 
 ```bash
 uv add "phytoworks[zarr]==${SDK_VERSION}"
@@ -239,11 +199,9 @@ Use the same approved Hub for re-login. Logging in again replaces the session in
 
 ## Upgrade or roll back
 
-Upgrade to a newly approved pinned PyPI version, or use a rolling checkout when the needed version is
-not published. Read the skill and README from the same checkout being installed, and repeat the source
-checks from the install section.
+Upgrade to a newly approved pinned PyPI version and repeat the source checks from the install section.
 
-For a PyPI rollback, set `SDK_VERSION` to the known-good version and reinstall the CLI and project
+To roll back, set `SDK_VERSION` to the known-good version and reinstall the CLI and project
 dependency from PyPI:
 
 ```bash
@@ -253,26 +211,9 @@ pws --version
 uv add "phytoworks==${SDK_VERSION}"
 ```
 
-For an interim rollback, make a fresh checkout at the previously recorded `SDK_SHA`; never use the
-current `rolling` tip as a fallback. Read that checkout's skill and README. If the recorded SHA cannot
-be fetched, stop and report that it is unavailable. Reinstall the CLI from that checkout; in the
-project, rerun the same base or optional-extra `uv add` form with
-`/path/to/pws-rollback/packages/sdk/python` and the same extra, if any. Verify the SHA and version:
-
-```bash
-git clone --no-checkout git@github.com:phytoworks/pws.git pws-rollback
-git -C pws-rollback fetch --depth 1 origin "$SDK_SHA"
-git -C pws-rollback checkout --detach "$SDK_SHA"
-test "$(git -C pws-rollback rev-parse HEAD)" = "$SDK_SHA"
-uv tool install --reinstall ./pws-rollback/packages/sdk/python
-pws --version
-python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("pws-rollback/packages/sdk/python/pyproject.toml").read_text())["project"]["version"])'
-```
-
-Compare `pws --version` with the checked-out `project.version` and record the SHA and installed
-version. Do not move or force-update a published tag. Run the project's normal checks after changing
+Confirm `pws --version` shows the known-good version. Do not move or force-update a published tag. Run the project's normal checks after changing
 its dependency.
 
 ## Report a failure
 
-Capture the command that failed, the exact `pws --version` output, the error/status, and the Hub request ID if the response includes one. Include the selected version or rolling SHA, Hub, profile, and organization ID when relevant. Remove access tokens, cookies, API keys, device codes, image contents, and other private data from the report.
+Capture the command that failed, the exact `pws --version` output, the error/status, and the Hub request ID if the response includes one. Include the selected version, Hub, profile, and organization ID when relevant. Remove access tokens, cookies, API keys, device codes, image contents, and other private data from the report.
