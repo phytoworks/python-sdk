@@ -233,7 +233,7 @@ class Device:
             raise TypeError("transport must be a low-level httpx transport; Device never shares an SDK client")
         # Before the key file is touched or any transport exists; the three transports share this Hub.
         hub = require_secure_hub(os.getenv("PWS_BASE_URL") or base_url or DEFAULT_BASE_URL)
-        path = Path(key_file)
+        path = Path(key_file).expanduser()
         self._key = read_agent_key_file(path)
         self._client = httpx.Client(transport=transport, timeout=timeout)
         self._transport = Transport(hub, client=self._client, timeout=timeout)

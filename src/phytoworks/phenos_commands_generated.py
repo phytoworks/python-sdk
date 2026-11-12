@@ -11,7 +11,7 @@ import typer
 
 from .phenos import read_stdin_args, run_generated_command
 
-REGISTRY_SHA256 = "7734d93d4742ea04f85156a36dafa4cc73a800f340c6088b17405c4ffa782736"
+REGISTRY_SHA256 = "520354e2a28b1099c99cfcf2b2ea870a64f8f5c677a3861c0fc3c6770140c415"
 OPERATION_SPECS = [
     {
         "id": "phenos_annotation_list",
@@ -835,7 +835,7 @@ OPERATION_SPECS = [
     {
         "id": "sandbox_bash",
         "version": 1,
-        "description": "Run one bash command in the analysis sandbox (no network). inputs/ holds the selected data; files saved in outputs/ are stored as results. Output is cut to 8 KiB (head and tail).",
+        "description": "Run one bash command in the analysis sandbox (no network). inputs/ holds the selected data; files saved in outputs/ are stored as results. Output is cut to 8 KiB (head and tail). A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
         "piTool": "bash",
         "external": "execution",
         "gatewayRetry": "never",
@@ -989,7 +989,7 @@ OPERATION_SPECS = [
     {
         "id": "sandbox_write",
         "version": 1,
-        "description": "Write a file in the sandbox working directory; files in outputs/ are stored as results.",
+        "description": "Write a file in the sandbox working directory; files in outputs/ are stored as results. A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
         "piTool": "write",
         "external": "execution",
         "gatewayRetry": "repeat",
@@ -1082,7 +1082,7 @@ OPERATION_SPECS = [
     {
         "id": "sandbox_edit",
         "version": 1,
-        "description": "Replace exact, unique text in one sandbox file; files in outputs/ are stored as results.",
+        "description": "Replace exact, unique text in one sandbox file; files in outputs/ are stored as results. A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
         "piTool": "edit",
         "external": "execution",
         "gatewayRetry": "never",
@@ -1250,7 +1250,11 @@ TOOL_GATEWAY_SCHEMAS = {
                         "phenos_tag_attach",
                         "phenos_tag_detach",
                         "phenos_photo_channels_set",
+                        "phenos_photo_scale_set",
                         "phenos_web_search",
+                        "phenos_recipe_list",
+                        "phenos_recipe_save",
+                        "phenos_recipe_run",
                         "phenos_photo_prepare",
                         "sandbox_bash",
                         "sandbox_read",
@@ -1629,7 +1633,11 @@ TOOL_GATEWAY_SCHEMAS = {
                                 "phenos_tag_attach",
                                 "phenos_tag_detach",
                                 "phenos_photo_channels_set",
+                                "phenos_photo_scale_set",
                                 "phenos_web_search",
+                                "phenos_recipe_list",
+                                "phenos_recipe_save",
+                                "phenos_recipe_run",
                                 "phenos_photo_prepare",
                                 "sandbox_bash",
                                 "sandbox_read",
@@ -2042,7 +2050,11 @@ TOOL_GATEWAY_SCHEMAS = {
                         "phenos_tag_attach",
                         "phenos_tag_detach",
                         "phenos_photo_channels_set",
+                        "phenos_photo_scale_set",
                         "phenos_web_search",
+                        "phenos_recipe_list",
+                        "phenos_recipe_save",
+                        "phenos_recipe_run",
                         "phenos_photo_prepare",
                         "sandbox_bash",
                         "sandbox_read",
@@ -2116,7 +2128,11 @@ TOOL_GATEWAY_SCHEMAS = {
                     "phenos_tag_attach",
                     "phenos_tag_detach",
                     "phenos_photo_channels_set",
+                    "phenos_photo_scale_set",
                     "phenos_web_search",
+                    "phenos_recipe_list",
+                    "phenos_recipe_save",
+                    "phenos_recipe_run",
                     "phenos_photo_prepare",
                     "sandbox_bash",
                     "sandbox_read",
@@ -2518,14 +2534,14 @@ PWS_ERROR_MESSAGES = {
     "invalid_arguments": "The arguments do not match this command; check the expected form and run it again.",
     "tool_contract_mismatch": "This pws version does not match the Phenos contract on the server; update pws.",
     "unauthenticated": "Your PhytoWorks login or Phenos session is missing or has expired; run `pws auth login`, then `pws phenos session start`.",
-    "not_found": "The image, ROI, file or execution was not found in this session; check the id or path and the active session.",
+    "not_found": "The image, ROI, annotation, file or execution was not found in this session; check the id or path and the active session.",
     "forbidden": "You do not have permission for this; check --org and your organization access.",
     "tool_not_allowed": "This operation is not allowed for this session; run `pws phenos --help` for the allowed commands.",
     "install_not_allowed": "That package is not on the approved install list; use an approved package or none.",
     "input_revision_changed": "The image or ROI changed after the session started; start a new session with `pws phenos session start`.",
     "input_undecodable": "The segmentation engine cannot decode the source image. It reads RGB or PNG pictures; multi-band raster data can be read through its bands.",
     "image_not_input": "The image is not one of the photos this session was started with; use one of them, or start a new session with this one.",
-    "annotation_kind_unsupported": "A session input takes rectangle annotations only; leave that annotation out and read it with `pws phenos annotation list`.",
+    "annotation_kind_unsupported": "An input takes only rectangles drawn on the photo itself; leave out an annotation of another shape, or one on another layer, which cannot be measured on this photo.",
     "tool_unavailable": "The Phenos service could not be reached; check the network and the Hub URL, then run it again.",
     "sandbox_unavailable": "The analysis sandbox is not available right now; run it again shortly.",
     "web_search_unavailable": "Web search is not available right now; carry on without it.",
@@ -2536,7 +2552,7 @@ PWS_ERROR_MESSAGES = {
     "storage_quota_exceeded": "The Workspace storage is full; nothing was saved until the person frees space.",
     "budget_exceeded": "The call budget for this session is used up; start a new session with `pws phenos session start`.",
     "intake_closed": "The server is not taking new work right now, so nothing started; run the same command again later.",
-    "credits_exhausted": "This workspace is out of credits, so the work did not start; ask an admin to add credits.",
+    "credits_exhausted": "This Workspace has no Credit left, so the work did not start; it can run once Credit is added.",
     "rate_limited": "The server is rate-limiting requests; wait a moment and run it again.",
     "timeout": "The call ran past its time limit and may still be running; check `pws phenos execution status`.",
     "cancelled": "The call was stopped or its result could not be recorded, so it may still have finished; check `pws phenos execution status` before running it again.",
@@ -3028,7 +3044,7 @@ def add_generated_commands(phenos_app: typer.Typer) -> None:  # noqa: C901 - cal
 
     @_sandbox_app.command(
         "bash",
-        help="Run one bash command in the analysis sandbox (no network). inputs/ holds the selected data; files saved in outputs/ are stored as results. Output is cut to 8 KiB (head and tail).",
+        help="Run one bash command in the analysis sandbox (no network). inputs/ holds the selected data; files saved in outputs/ are stored as results. Output is cut to 8 KiB (head and tail). A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
     )
     def _sandbox_bash(
         ctx: typer.Context,
@@ -3079,7 +3095,8 @@ def add_generated_commands(phenos_app: typer.Typer) -> None:  # noqa: C901 - cal
         )
 
     @_sandbox_app.command(
-        "write", help="Write a file in the sandbox working directory; files in outputs/ are stored as results."
+        "write",
+        help="Write a file in the sandbox working directory; files in outputs/ are stored as results. A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
     )
     def _sandbox_write(
         ctx: typer.Context,
@@ -3104,7 +3121,8 @@ def add_generated_commands(phenos_app: typer.Typer) -> None:  # noqa: C901 - cal
         )
 
     @_sandbox_app.command(
-        "edit", help="Replace exact, unique text in one sandbox file; files in outputs/ are stored as results."
+        "edit",
+        help="Replace exact, unique text in one sandbox file; files in outputs/ are stored as results. A .csv in outputs/ is not kept (invalid_content) when a text cell starts with =, +, - or @; start such a cell with '. Leave numbers such as -3.5, +0.2 and a lone - as they are: only text cells get the '.",
     )
     def _sandbox_edit(
         ctx: typer.Context,

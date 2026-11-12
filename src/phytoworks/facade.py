@@ -335,14 +335,22 @@ def _manual_execution_body(execution_id: str, resolved: ResolvedAction) -> dict[
     }
 
 
+def _outcome_unknown(exc: PWSError) -> bool:
+    """A failure after which the Hub may or may not have accepted the request, so repeating it is the safe answer.
+
+    Any other error (a 409 replay conflict, 413, 422) is a definite reply that a repeat cannot change.
+    """
+    return isinstance(exc, RateLimitError) or (
+        isinstance(exc, TransportError) and (exc.status_code is None or exc.status_code >= 500)
+    )
+
+
 def _manual_retry_delay(exc: PWSError, attempt: int) -> float | None:
-    if attempt >= 2:
+    if attempt >= 2 or not _outcome_unknown(exc):
         return None
-    if isinstance(exc, RateLimitError):
-        return float(exc.retry_after) if exc.retry_after is not None else 0.25 * (2.0**attempt)
-    if isinstance(exc, TransportError) and (exc.status_code is None or exc.status_code >= 500):
-        return 0.25 * (2.0**attempt)
-    return None
+    if isinstance(exc, RateLimitError) and exc.retry_after is not None:
+        return float(exc.retry_after)
+    return 0.25 * (2.0**attempt)
 
 
 def _execution_status(result: ActionExecutionStatus) -> str:
@@ -683,11 +691,16 @@ class SpotActionResource:
                 retries += 1
         model = _parse_model(payload, ManualActionExecution)
         if model.execution_id != execution_id:
-            raise ValidationError("Hub returned a different action execution ID")
+            raise ValidationError("Hub returned a different action execution ID", execution_id=execution_id)
         execution = Execution(execution_id, model, resolved.timeout + 15)
         _remember_timeout(self._spot._client.actions._timeouts, execution_id, execution.timeout, model.status)
         if wait:
-            execution.result = self._spot._client.actions.wait(execution_id)
+            try:
+                execution.result = self._spot._client.actions.wait(execution_id)
+            except PWSError as exc:
+                # Hub accepted the run, so the device may be acting: a retry must reuse this id.
+                exc.execution_id = exc.execution_id or execution_id
+                raise
         return execution
 
 
@@ -2026,11 +2039,16 @@ class AsyncSpotActionResource:
                 retries += 1
         model = _parse_model(payload, ManualActionExecution)
         if model.execution_id != execution_id:
-            raise ValidationError("Hub returned a different action execution ID")
+            raise ValidationError("Hub returned a different action execution ID", execution_id=execution_id)
         execution = Execution(execution_id, model, resolved.timeout + 15)
         _remember_timeout(self._spot._client.actions._timeouts, execution_id, execution.timeout, model.status)
         if wait:
-            execution.result = await self._spot._client.actions.wait(execution_id)
+            try:
+                execution.result = await self._spot._client.actions.wait(execution_id)
+            except PWSError as exc:
+                # Hub accepted the run, so the device may be acting: a retry must reuse this id.
+                exc.execution_id = exc.execution_id or execution_id
+                raise
         return execution
 
 

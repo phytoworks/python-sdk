@@ -10,20 +10,20 @@ officially verified.
 Install the Python package or the CLI:
 
 ```bash
-pip install phytoworks==0.1.2
-uv tool install phytoworks==0.1.2
+pip install phytoworks==0.1.3
+uv tool install phytoworks==0.1.3
 ```
 
 Optional features are installed as extras:
 
 ```bash
-pip install 'phytoworks[pandas]==0.1.2'  # telemetry DataFrames
-pip install 'phytoworks[zarr]==0.1.2'     # array and Zarr media
-pip install 'phytoworks[device]==0.1.2'   # Device.listen() MQTT receive loop
+pip install 'phytoworks[pandas]==0.1.3'  # telemetry DataFrames
+pip install 'phytoworks[zarr]==0.1.3'     # array and Zarr media
+pip install 'phytoworks[device]==0.1.3'   # Device.listen() MQTT receive loop
 ```
 
 For a Python project managed by uv, add the base package or the needed extras
-with `uv add`, for example `uv add 'phytoworks[zarr]==0.1.2'`.
+with `uv add`, for example `uv add 'phytoworks[zarr]==0.1.3'`.
 
 ## Quickstart
 
@@ -72,45 +72,19 @@ pws edge actions describe <action-name> --spot <spot-id>
 pws edge actions run <action-name> --spot <spot-id> --params '{"duration":120}' --device <device-id>
 ```
 
-The top level holds `auth`, `orgs`, `config`, `doctor`, `phenos` and `approvals`.
-Everything else lives in a group: `pws edge` for sites and equipment (spots,
-devices, components, actions, rules, telemetry, agents, provisioning) and
-`pws data` for captures and media. `pws phenos` works on one photo in a scoped
-session (annotations, inference, executions), and `pws approvals` follows the
-requests that wait for a person to approve them in Phenos.
-Typing a noun outside its group, such as `pws spots list`, stops with the full
-path to use. A scope is an option (`--spot`, `--device`, `--agent`, `--capture`);
-the thing you act on is the positional argument.
+The top level holds `auth`, `orgs`, `config` and `doctor`. Everything else lives
+in a group: `pws edge` for sites and equipment (spots, devices, components,
+actions, rules, telemetry, agents, provisioning) and `pws data` for captures and
+media. Typing a noun outside its group, such as `pws spots list`, stops with the
+full path to use. A scope is an option (`--spot`, `--device`, `--agent`,
+`--capture`); the thing you act on is the positional argument.
 
 On a terminal, commands show readable tables. Use `--json` or `--jsonl` for
 machine-readable output, or `-q` for identifiers and download paths. Rule
 editing stays in the PhytoWorks Console.
 
-`pws phenos inference start` returns an execution id. The outlines it finds are
-added to the photo when `pws phenos execution status ID` reads the execution, so
-read it again until it finishes; `pws phenos execution wait ID` does that for you.
-
-Sign in with an organization (`pws auth login --org <ORG_ID>`), then start a session for one photo and run an operation in it:
-
-```bash
-pws phenos session start --image <image-id>
-pws phenos inference start --model sam3 --image <image-id> --prompt plant
-pws phenos execution wait <execution-id>
-```
-
-A change or delete of annotations waits for a person to approve it in Phenos: the
-command exits 10 and prints an approval id. `pws approvals wait` only reads; once
-it exits 0, run the same command again to use the approval.
-
-```bash
-pws phenos annotation delete --image <image-id> --annotation <annotation-id>
-pws approvals wait <approval-id>
-pws phenos annotation delete --image <image-id> --annotation <annotation-id>
-```
-
-`--timeout` on `execution wait` and `approvals wait` is not a hard stop: the first
-check always runs, no new check starts once the time is up, and a check already
-under way is not cut off.
+The Phenos command groups (`pws phenos`, `pws approvals`) are not public yet and
+do not appear in `pws --help`.
 
 ## Exit codes
 
@@ -123,7 +97,7 @@ under way is not cut off.
 | 4 | not_found | The thing asked for does not exist in this scope. |
 | 5 | permission | The login may not do this. |
 | 6 | action_failed | A started action or Phenos execution ended failed or cancelled. |
-| 7 | action_timeout | The outcome is unknown; a started job may still be running. |
+| 7 | action_timeout | The outcome is unknown; a started job may still be running. This includes an action run whose reply was lost: rerun it with the printed `--execution-id` and the same arguments, and Hub replays it instead of starting the action again. |
 | 8 | provisioning_denied | `pws edge provisioning check` was denied. |
 | 9 | provisioning_unknown | `pws edge provisioning check` could not decide. |
 | 10 | approval_pending | A person must approve the request in Phenos; nothing started. |
@@ -156,7 +130,7 @@ or `~/.agents/skills/` to use it, and invoke it by name, `/pws-onboarding` or
 To install both skills for Claude Code and Codex without copying folders by hand:
 
 ```bash
-npx skills add phytoworks/python-sdk#v0.1.2
+npx skills add phytoworks/python-sdk#v0.1.3
 ```
 
 ## Documentation
@@ -164,3 +138,5 @@ npx skills add phytoworks/python-sdk#v0.1.2
 The [SDK and CLI quickstart](https://docs.phyto-works.com/guides/sdk-cli/quickstart)
 has setup, authentication, Device, and workflow guides. Visit the
 [PhytoWorks homepage](https://phyto-works.com) for product information.
+Release notes and the 0.x version policy are in the
+[changelog](https://github.com/phytoworks/python-sdk/blob/main/CHANGELOG.md).

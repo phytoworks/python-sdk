@@ -1,6 +1,6 @@
 [project]
 name = "phytoworks"
-version = "0.1.2"
+version = "0.1.3"
 description = "PhytoWorks operator SDK and pws CLI"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -53,7 +53,13 @@ requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/phytoworks", "/examples", "/README.md", "/pyproject.toml"]
+include = [
+  "/src/phytoworks",
+  "/examples",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/pyproject.toml",
+]
 
 [tool.hatch.build.targets.wheel]
 only-include = ["src/phytoworks"]

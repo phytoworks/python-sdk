@@ -20,7 +20,7 @@ This guide installs the `phytoworks` SDK and `pws` CLI from a pinned PyPI releas
 Set the exact version you intend to install:
 
 ```bash
-SDK_VERSION=0.1.2
+SDK_VERSION=0.1.3
 ```
 
 ## Find this skill

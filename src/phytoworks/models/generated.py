@@ -107,6 +107,54 @@ exist here.  Inline objects were hoisted under these names:
   PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions <- PhenosSession.references.image.sourceBinding.grid.<oneOf:NativePlane>.dimensions
   PhenosSessionReferencesImageSourceBindingPlane <- PhenosSession.references.image.sourceBinding.plane
   PhenosSessionReferencesImageSourceBindingPlaneAxisSelection <- PhenosSession.references.image.sourceBinding.plane.axisSelection
+  RecipeBatchPageCounts <- RecipeBatchPage.counts
+  RecipeBatchPageRow <- RecipeBatchPage.rows[]
+  RecipeBatchPageRowMetricsValue <- RecipeBatchPage.rows[].metrics{}
+  RecipeBatchPageRowScale <- RecipeBatchPage.rows[].scale
+  RecipeBatchPageRowTag <- RecipeBatchPage.rows[].tags[]
+  RecipeDetailDefinition <- RecipeDetail.definition
+  RecipeDetailDefinitionSlotAnnotations <- RecipeDetail.definition.slots[].<oneOf:Annotations>
+  RecipeDetailDefinitionSlotAnnotationsSelectAll <- RecipeDetail.definition.slots[].<oneOf:Annotations>.select.<anyOf:All>
+  RecipeDetailDefinitionSlotAnnotationsSelectTag <- RecipeDetail.definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>
+  RecipeDetailDefinitionSlotPhoto <- RecipeDetail.definition.slots[].<oneOf:Photo>
+  RecipeDetailDefinitionStep <- RecipeDetail.definition.steps[]
+  RecipeDetailDefinitionStepInputsValue <- RecipeDetail.definition.steps[].inputs{}
+  RecipeDetailVersion <- RecipeDetail.versions[]
+  RecipeDetailVersionBasisCountOnly <- RecipeDetail.versions[].basis.<oneOf:CountOnly>
+  RecipeDetailVersionBasisReadable <- RecipeDetail.versions[].basis.<oneOf:Readable>
+  RecipeDetailVersionBasisReadableEntry <- RecipeDetail.versions[].basis.<oneOf:Readable>.entries[]
+  RecipeDetailVersionContextHidden <- RecipeDetail.versions[].context.<oneOf:Hidden>
+  RecipeDetailVersionContextNone <- RecipeDetail.versions[].context.<oneOf:None>
+  RecipeDetailVersionContextPhoto <- RecipeDetail.versions[].context.<oneOf:Photo>
+  RecipeDetailVersionDefinition <- RecipeDetail.versions[].definition
+  RecipeDetailVersionDefinitionSlotAnnotations <- RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>
+  RecipeDetailVersionDefinitionSlotAnnotationsSelectAll <- RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>.select.<anyOf:All>
+  RecipeDetailVersionDefinitionSlotAnnotationsSelectTag <- RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>
+  RecipeDetailVersionDefinitionSlotPhoto <- RecipeDetail.versions[].definition.slots[].<oneOf:Photo>
+  RecipeDetailVersionDefinitionStep <- RecipeDetail.versions[].definition.steps[]
+  RecipeDetailVersionDefinitionStepInputsValue <- RecipeDetail.versions[].definition.steps[].inputs{}
+  RecipeListRecipe <- RecipeList.recipes[]
+  RecipeListRecipeDefinition <- RecipeList.recipes[].definition
+  RecipeListRecipeDefinitionSlotAnnotations <- RecipeList.recipes[].definition.slots[].<oneOf:Annotations>
+  RecipeListRecipeDefinitionSlotAnnotationsSelectAll <- RecipeList.recipes[].definition.slots[].<oneOf:Annotations>.select.<anyOf:All>
+  RecipeListRecipeDefinitionSlotAnnotationsSelectTag <- RecipeList.recipes[].definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>
+  RecipeListRecipeDefinitionSlotPhoto <- RecipeList.recipes[].definition.slots[].<oneOf:Photo>
+  RecipeListRecipeDefinitionStep <- RecipeList.recipes[].definition.steps[]
+  RecipeListRecipeDefinitionStepInputsValue <- RecipeList.recipes[].definition.steps[].inputs{}
+  RecipeRunAgainRun <- RecipeRunAgain.runs[]
+  RecipeRunStartRun <- RecipeRunStart.runs[]
+  RecipeRunStep <- RecipeRun.steps[]
+  RecipeRunStepOutput <- RecipeRun.steps[].outputs[]
+  RecipeRunStepOutputMetricsValue <- RecipeRun.steps[].outputs[].metrics{}
+  RecipeRunStepOutputProvenance <- RecipeRun.steps[].outputs[].provenance
+  RecipeRunStepOutputProvenanceCodec <- RecipeRun.steps[].outputs[].provenance.codec
+  RecipeSummaryDefinition <- RecipeSummary.definition
+  RecipeSummaryDefinitionSlotAnnotations <- RecipeSummary.definition.slots[].<oneOf:Annotations>
+  RecipeSummaryDefinitionSlotAnnotationsSelectAll <- RecipeSummary.definition.slots[].<oneOf:Annotations>.select.<anyOf:All>
+  RecipeSummaryDefinitionSlotAnnotationsSelectTag <- RecipeSummary.definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>
+  RecipeSummaryDefinitionSlotPhoto <- RecipeSummary.definition.slots[].<oneOf:Photo>
+  RecipeSummaryDefinitionStep <- RecipeSummary.definition.steps[]
+  RecipeSummaryDefinitionStepInputsValue <- RecipeSummary.definition.steps[].inputs{}
   RuleAction <- Rule.actions[]
   RuleActionActionDefinition <- Rule.actions[].actionDefinition
   RuleActionActionDefinitionNameTranslation <- Rule.actions[].actionDefinition.nameTranslation
@@ -153,10 +201,10 @@ exist here.  Inline objects were hoisted under these names:
   SpotTag <- Spot.tags[]
 
 Generator: datamodel-code-generator 0.76.1
-Artifact SHA-256: bafbe710bc76212bbb064ab2bf2233e0ad97a740c691976fe64e159da6f09dc8
+Artifact SHA-256: 512ceacca08c3ca3158df48829def6217c2e7d074dd6ab877e0bc5aa46779f85
 Allowlist: scripts/model-allowlist.json
-Allowlist SHA-256: 17cdde5072211f85a8b1873c2e8c9c135cb36c1e924fcc83ea443c8ed2e848bd
-Body SHA-256: 36691a9c57fc5daff108cc3b4b0e213a1e11398b182eb809f5b9dabc7742b650
+Allowlist SHA-256: a66174e43bc3c1e641cfbff48997c4fbb0c156b12d2424bc666d9b8537e10dd4
+Body SHA-256: c780ff31c56668808f557658e8de827e70c0cd0a6d779fbbf88f1e6b0b3c9142
 """
 
 from __future__ import annotations
@@ -1902,6 +1950,775 @@ class PhenosSessionReferencesImageSourceBindingPlaneAxisSelection(WireModel):
     fixed_axis_indices: Annotated[dict[str, FixedAxisIndicesAdditionalProperty], Field(alias="fixedAxisIndices")]
 
 
+class RecipeBatchCancel(WireModel):
+    """
+    Wire model for OpenAPI component RecipeBatchCancelResponseDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    cancelled: Annotated[int, Field(ge=0, le=9007199254740991)]
+
+
+class RecipeBatchPage(WireModel):
+    """
+    Wire model for OpenAPI component RecipeBatchPageDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    batch_id: Annotated[str, Field(alias="batchId")]
+    recipe_id: Annotated[str, Field(alias="recipeId")]
+    recipe_version: Annotated[int, Field(alias="recipeVersion", gt=0, le=9007199254740991)]
+    definition_fingerprint: Annotated[str, Field(alias="definitionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    counts: RecipeBatchPageCounts
+    partial: bool
+    hidden_photos: Annotated[int, Field(alias="hiddenPhotos", ge=0, le=9007199254740991)]
+    fingerprint: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    page: Annotated[int, Field(ge=0, le=9007199254740991)]
+    next_page: Annotated[int | None, Field(alias="nextPage", gt=0, le=9007199254740991)]
+    rows: list[RecipeBatchPageRow]
+
+
+class RecipeBatchPageCounts(WireModel):
+    """
+    Inline object hoisted from RecipeBatchPage.counts.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    queued: Annotated[int, Field(ge=0, le=9007199254740991)]
+    running: Annotated[int, Field(ge=0, le=9007199254740991)]
+    succeeded: Annotated[int, Field(ge=0, le=9007199254740991)]
+    blocked: Annotated[int, Field(ge=0, le=9007199254740991)]
+    failed: Annotated[int, Field(ge=0, le=9007199254740991)]
+    cancelled: Annotated[int, Field(ge=0, le=9007199254740991)]
+
+
+class RecipeBatchPageRow(WireModel):
+    """
+    Inline object hoisted from RecipeBatchPage.rows[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    run_id: Annotated[str, Field(alias="runId")]
+    image_id: Annotated[str, Field(alias="imageId")]
+    file_id: Annotated[str | None, Field(alias="fileId")]
+    photo_name: Annotated[str | None, Field(alias="photoName")]
+    status: str
+    failure_code: Annotated[str | None, Field(alias="failureCode")]
+    step_id: Annotated[str | None, Field(alias="stepId")]
+    operation_key: Annotated[str | None, Field(alias="operationKey")]
+    annotation_id: Annotated[str | None, Field(alias="annotationId")]
+    output_status: Annotated[str | None, Field(alias="outputStatus")]
+    unavailable_reason: Annotated[str | None, Field(alias="unavailableReason")]
+    metrics: Annotated[dict[str, RecipeBatchPageRowMetricsValue] | None, Field(...)]
+    comparison: Annotated[str | None, Field(...)]
+    annotation_name: Annotated[str | None, Field(alias="annotationName")]
+    tags: list[RecipeBatchPageRowTag]
+    area: Annotated[dict[str, Any] | None, Field(...)]
+    scale: Annotated[RecipeBatchPageRowScale | None, Field(...)]
+
+
+class RecipeBatchPageRowMetricsValue(WireModel):
+    """
+    Inline object hoisted from RecipeBatchPage.rows[].metrics{}.
+    """
+
+    value: float
+    quantity: str
+    unit: Annotated[str, Field(min_length=1)]
+
+
+class RecipeBatchPageRowScale(WireModel):
+    """
+    Inline object hoisted from RecipeBatchPage.rows[].scale.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    units_per_pixel: Annotated[float, Field(alias="unitsPerPixel", gt=0.0)]
+    unit: str
+
+
+class RecipeBatchPageRowTag(WireModel):
+    """
+    Inline object hoisted from RecipeBatchPage.rows[].tags[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    name: Annotated[str | None, Field(...)]
+
+
+class RecipeDetail(WireModel):
+    """
+    Wire model for OpenAPI component RecipeDetailDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    name: str
+    description: str
+    current_version: Annotated[int, Field(alias="currentVersion", gt=0, le=9007199254740991)]
+    fingerprint: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    definition: RecipeDetailDefinition
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+    versions: list[RecipeDetailVersion]
+
+
+class RecipeDetailDefinition(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_: Annotated[str, Field(alias="schema")]
+    slots: list[RecipeDetailDefinitionSlotPhoto | RecipeDetailDefinitionSlotAnnotations]
+    steps: list[RecipeDetailDefinitionStep]
+
+
+class RecipeDetailDefinitionSlotAnnotations(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.slots[].<oneOf:Annotations>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+    of: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    select: RecipeDetailDefinitionSlotAnnotationsSelectAll | RecipeDetailDefinitionSlotAnnotationsSelectTag
+
+
+class RecipeDetailDefinitionSlotAnnotationsSelectAll(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.slots[].<oneOf:Annotations>.select.<anyOf:All>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    all: Literal[True]
+
+
+class RecipeDetailDefinitionSlotAnnotationsSelectTag(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    tag: Annotated[str, Field(max_length=80, min_length=1)]
+
+
+class RecipeDetailDefinitionSlotPhoto(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.slots[].<oneOf:Photo>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+
+
+class RecipeDetailDefinitionStep(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.steps[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    operation_key: Annotated[str, Field(alias="operationKey")]
+    parameters: dict[str, Any]
+    inputs: dict[str, RecipeDetailDefinitionStepInputsValue]
+
+
+class RecipeDetailDefinitionStepInputsValue(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.definition.steps[].inputs{}.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    slot: str
+    series: str | None = None
+
+
+class RecipeDetailVersion(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    version: Annotated[int, Field(gt=0, le=9007199254740991)]
+    fingerprint: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    definition: RecipeDetailVersionDefinition
+    created_by_user_id: Annotated[str, Field(alias="createdByUserId")]
+    via: str
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    context: RecipeDetailVersionContextNone | RecipeDetailVersionContextPhoto | RecipeDetailVersionContextHidden
+    basis: RecipeDetailVersionBasisReadable | RecipeDetailVersionBasisCountOnly
+
+
+class RecipeDetailVersionBasisCountOnly(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].basis.<oneOf:CountOnly>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    access: str
+    count: Annotated[int, Field(ge=0, le=9007199254740991)]
+
+
+class RecipeDetailVersionBasisReadable(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].basis.<oneOf:Readable>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    access: str
+    entries: list[RecipeDetailVersionBasisReadableEntry]
+
+
+class RecipeDetailVersionBasisReadableEntry(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].basis.<oneOf:Readable>.entries[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    annotation_id: Annotated[str, Field(alias="annotationId")]
+    revision: Annotated[int, Field(ge=0, le=9007199254740991)]
+    provider_id: Annotated[str, Field(alias="providerId", min_length=1)]
+    result_digest: Annotated[str, Field(alias="resultDigest", pattern="^sha256:[0-9a-f]{64}$")]
+    status: str
+    name: Annotated[str | None, Field(...)]
+    deleted: bool
+
+
+class RecipeDetailVersionContextHidden(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].context.<oneOf:Hidden>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    of: str
+
+
+class RecipeDetailVersionContextNone(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].context.<oneOf:None>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+
+
+class RecipeDetailVersionContextPhoto(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].context.<oneOf:Photo>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: str
+    image_id: Annotated[str, Field(alias="imageId")]
+    content_sha256: Annotated[str, Field(alias="contentSha256", pattern="^sha256:[0-9a-f]{64}$")]
+
+
+class RecipeDetailVersionDefinition(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_: Annotated[str, Field(alias="schema")]
+    slots: list[RecipeDetailVersionDefinitionSlotPhoto | RecipeDetailVersionDefinitionSlotAnnotations]
+    steps: list[RecipeDetailVersionDefinitionStep]
+
+
+class RecipeDetailVersionDefinitionSlotAnnotations(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+    of: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    select: (
+        RecipeDetailVersionDefinitionSlotAnnotationsSelectAll | RecipeDetailVersionDefinitionSlotAnnotationsSelectTag
+    )
+
+
+class RecipeDetailVersionDefinitionSlotAnnotationsSelectAll(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>.select.<anyOf:All>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    all: Literal[True]
+
+
+class RecipeDetailVersionDefinitionSlotAnnotationsSelectTag(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    tag: Annotated[str, Field(max_length=80, min_length=1)]
+
+
+class RecipeDetailVersionDefinitionSlotPhoto(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.slots[].<oneOf:Photo>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+
+
+class RecipeDetailVersionDefinitionStep(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.steps[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    operation_key: Annotated[str, Field(alias="operationKey")]
+    parameters: dict[str, Any]
+    inputs: dict[str, RecipeDetailVersionDefinitionStepInputsValue]
+
+
+class RecipeDetailVersionDefinitionStepInputsValue(WireModel):
+    """
+    Inline object hoisted from RecipeDetail.versions[].definition.steps[].inputs{}.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    slot: str
+    series: str | None = None
+
+
+class RecipeList(WireModel):
+    """
+    Wire model for OpenAPI component RecipeListDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    recipes: list[RecipeListRecipe]
+
+
+class RecipeListRecipe(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    name: str
+    description: str
+    current_version: Annotated[int, Field(alias="currentVersion", gt=0, le=9007199254740991)]
+    fingerprint: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    definition: RecipeListRecipeDefinition
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class RecipeListRecipeDefinition(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_: Annotated[str, Field(alias="schema")]
+    slots: list[RecipeListRecipeDefinitionSlotPhoto | RecipeListRecipeDefinitionSlotAnnotations]
+    steps: list[RecipeListRecipeDefinitionStep]
+
+
+class RecipeListRecipeDefinitionSlotAnnotations(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.slots[].<oneOf:Annotations>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+    of: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    select: RecipeListRecipeDefinitionSlotAnnotationsSelectAll | RecipeListRecipeDefinitionSlotAnnotationsSelectTag
+
+
+class RecipeListRecipeDefinitionSlotAnnotationsSelectAll(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.slots[].<oneOf:Annotations>.select.<anyOf:All>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    all: Literal[True]
+
+
+class RecipeListRecipeDefinitionSlotAnnotationsSelectTag(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    tag: Annotated[str, Field(max_length=80, min_length=1)]
+
+
+class RecipeListRecipeDefinitionSlotPhoto(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.slots[].<oneOf:Photo>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+
+
+class RecipeListRecipeDefinitionStep(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.steps[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    operation_key: Annotated[str, Field(alias="operationKey")]
+    parameters: dict[str, Any]
+    inputs: dict[str, RecipeListRecipeDefinitionStepInputsValue]
+
+
+class RecipeListRecipeDefinitionStepInputsValue(WireModel):
+    """
+    Inline object hoisted from RecipeList.recipes[].definition.steps[].inputs{}.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    slot: str
+    series: str | None = None
+
+
+class RecipeRun(WireModel):
+    """
+    Wire model for OpenAPI component RecipeRunViewDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    recipe_id: Annotated[str, Field(alias="recipeId")]
+    recipe_version: Annotated[int, Field(alias="recipeVersion", gt=0, le=9007199254740991)]
+    definition_fingerprint: Annotated[str, Field(alias="definitionFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    image_id: Annotated[str, Field(alias="imageId")]
+    batch_id: Annotated[str | None, Field(alias="batchId")]
+    rerun_of: Annotated[str | None, Field(alias="rerunOf")]
+    via: str
+    status: str
+    failure_code: Annotated[str | None, Field(alias="failureCode")]
+    comparison: Annotated[str | None, Field(...)]
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    started_at: Annotated[AwareDatetime | None, Field(alias="startedAt")]
+    finished_at: Annotated[AwareDatetime | None, Field(alias="finishedAt")]
+    readable: bool
+    binding: Annotated[dict[str, Any] | None, Field(...)]
+    steps: list[RecipeRunStep]
+    annotation_names: Annotated[dict[str, str], Field(alias="annotationNames")]
+
+
+class RecipeRunAgain(WireModel):
+    """
+    Wire model for OpenAPI component RecipeRunAgainResponseDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    batch_id: Annotated[str | None, Field(alias="batchId")]
+    runs: list[RecipeRunAgainRun]
+    skipped: Annotated[int, Field(ge=0, le=9007199254740991)]
+
+
+class RecipeRunAgainRun(WireModel):
+    """
+    Inline object hoisted from RecipeRunAgain.runs[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    image_id: Annotated[str, Field(alias="imageId")]
+    status: str
+
+
+class RecipeRunStart(WireModel):
+    """
+    Wire model for OpenAPI component RecipeRunStartResponseDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    batch_id: Annotated[str | None, Field(alias="batchId")]
+    runs: list[RecipeRunStartRun]
+    skipped: Annotated[int, Field(ge=0, le=9007199254740991)]
+
+
+class RecipeRunStartRun(WireModel):
+    """
+    Inline object hoisted from RecipeRunStart.runs[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    image_id: Annotated[str, Field(alias="imageId")]
+    status: str
+
+
+class RecipeRunStep(WireModel):
+    """
+    Inline object hoisted from RecipeRun.steps[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    operation_key: Annotated[str, Field(alias="operationKey", pattern="^[a-z0-9][a-z0-9._-]*@[1-9][0-9]*$")]
+    parameter_fingerprint: Annotated[str | None, Field(alias="parameterFingerprint", pattern="^sha256:[0-9a-f]{64}$")]
+    verdict: str
+    outputs: list[RecipeRunStepOutput]
+
+
+class RecipeRunStepOutput(WireModel):
+    """
+    Inline object hoisted from RecipeRun.steps[].outputs[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    annotation_id: Annotated[str, Field(alias="annotationId")]
+    provider_id: Annotated[str, Field(alias="providerId", min_length=1)]
+    operation_key: Annotated[str, Field(alias="operationKey", pattern="^[a-z0-9][a-z0-9._-]*@[1-9][0-9]*$")]
+    result_digest: Annotated[str, Field(alias="resultDigest", pattern="^sha256:[0-9a-f]{64}$")]
+    status: str
+    unavailable_reason: Annotated[str | None, Field(alias="unavailableReason")]
+    metrics: dict[str, RecipeRunStepOutputMetricsValue]
+    provenance: Annotated[RecipeRunStepOutputProvenance | None, Field(...)]
+    comparison: str | None = None
+
+
+class RecipeRunStepOutputMetricsValue(WireModel):
+    """
+    Inline object hoisted from RecipeRun.steps[].outputs[].metrics{}.
+    """
+
+    value: float
+    quantity: str
+    unit: Annotated[str, Field(min_length=1)]
+
+
+class RecipeRunStepOutputProvenance(WireModel):
+    """
+    Inline object hoisted from RecipeRun.steps[].outputs[].provenance.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    image_lib: Annotated[str, Field(alias="imageLib", min_length=1)]
+    host: str
+    codec: RecipeRunStepOutputProvenanceCodec | None = None
+
+
+class RecipeRunStepOutputProvenanceCodec(WireModel):
+    """
+    Inline object hoisted from RecipeRun.steps[].outputs[].provenance.codec.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(min_length=1)]
+    version: Annotated[str, Field(min_length=1)]
+
+
+class RecipeSummary(WireModel):
+    """
+    Wire model for OpenAPI component RecipeSummaryDto.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    name: str
+    description: str
+    current_version: Annotated[int, Field(alias="currentVersion", gt=0, le=9007199254740991)]
+    fingerprint: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    definition: RecipeSummaryDefinition
+    created_at: Annotated[AwareDatetime, Field(alias="createdAt")]
+    updated_at: Annotated[AwareDatetime, Field(alias="updatedAt")]
+
+
+class RecipeSummaryDefinition(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    schema_: Annotated[str, Field(alias="schema")]
+    slots: list[RecipeSummaryDefinitionSlotPhoto | RecipeSummaryDefinitionSlotAnnotations]
+    steps: list[RecipeSummaryDefinitionStep]
+
+
+class RecipeSummaryDefinitionSlotAnnotations(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.slots[].<oneOf:Annotations>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+    of: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    select: RecipeSummaryDefinitionSlotAnnotationsSelectAll | RecipeSummaryDefinitionSlotAnnotationsSelectTag
+
+
+class RecipeSummaryDefinitionSlotAnnotationsSelectAll(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.slots[].<oneOf:Annotations>.select.<anyOf:All>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    all: Literal[True]
+
+
+class RecipeSummaryDefinitionSlotAnnotationsSelectTag(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.slots[].<oneOf:Annotations>.select.<anyOf:Tag>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    tag: Annotated[str, Field(max_length=80, min_length=1)]
+
+
+class RecipeSummaryDefinitionSlotPhoto(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.slots[].<oneOf:Photo>.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(pattern="^[a-z][a-z0-9-]{0,31}$")]
+    kind: str
+
+
+class RecipeSummaryDefinitionStep(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.steps[].
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: str
+    operation_key: Annotated[str, Field(alias="operationKey")]
+    parameters: dict[str, Any]
+    inputs: dict[str, RecipeSummaryDefinitionStepInputsValue]
+
+
+class RecipeSummaryDefinitionStepInputsValue(WireModel):
+    """
+    Inline object hoisted from RecipeSummary.definition.steps[].inputs{}.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    slot: str
+    series: str | None = None
+
+
 class Rule(WireModel):
     """
     Wire model for OpenAPI component RuleResponseDto.
@@ -2787,6 +3604,10 @@ G3_OPERATION_ALLOWLIST = frozenset(
         ("GET", "/api/v1/agents/management/{id}/telemetry/batch-rollup"),
         ("GET", "/api/v1/agents/management/{id}/topics"),
         ("GET", "/api/v1/agents/media/assets/{id}/band-provenance"),
+        ("GET", "/api/v1/analysis/recipe-batches/{batchId}"),
+        ("GET", "/api/v1/analysis/recipe-runs/{runId}"),
+        ("GET", "/api/v1/analysis/recipes"),
+        ("GET", "/api/v1/analysis/recipes/{id}"),
         ("GET", "/api/v1/auth/access/me"),
         ("GET", "/api/v1/components"),
         ("GET", "/api/v1/devices"),
@@ -2812,6 +3633,7 @@ G3_OPERATION_ALLOWLIST = frozenset(
         ("GET", "/api/v1/spots/{spotId}/rules/{id}"),
         ("GET", "/api/v1/spots/{spotId}/rules/{id}/executions"),
         ("GET", "/api/v1/tool-gateway/sessions/{sessionId}"),
+        ("PATCH", "/api/v1/analysis/recipes/{id}"),
         ("POST", "/api/v1/actions/executions/manual"),
         ("POST", "/api/v1/actions/executions/preview"),
         ("POST", "/api/v1/agents/device/action-executions"),
@@ -2835,6 +3657,12 @@ G3_OPERATION_ALLOWLIST = frozenset(
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/complete"),
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/fail"),
         ("POST", "/api/v1/agents/media/capture-sessions/{id}/start"),
+        ("POST", "/api/v1/analysis/recipe-batches/{batchId}/cancel"),
+        ("POST", "/api/v1/analysis/recipe-batches/{batchId}/recheck"),
+        ("POST", "/api/v1/analysis/recipe-batches/{batchId}/retry"),
+        ("POST", "/api/v1/analysis/recipe-runs/{runId}/recheck"),
+        ("POST", "/api/v1/analysis/recipes"),
+        ("POST", "/api/v1/analysis/recipes/{id}/runs"),
         ("POST", "/api/v1/artifacts/{artifactId}/open"),
         ("POST", "/api/v1/media/assets/complete-image-upload"),
         ("POST", "/api/v1/media/assets/upload-image"),
@@ -2973,6 +3801,62 @@ __all__ = [
     "PhenosSessionReferencesImageSourceBindingGridNativePlaneDimensions",
     "PhenosSessionReferencesImageSourceBindingPlane",
     "PhenosSessionReferencesImageSourceBindingPlaneAxisSelection",
+    "RecipeBatchCancel",
+    "RecipeBatchPage",
+    "RecipeBatchPageCounts",
+    "RecipeBatchPageRow",
+    "RecipeBatchPageRowMetricsValue",
+    "RecipeBatchPageRowScale",
+    "RecipeBatchPageRowTag",
+    "RecipeDetail",
+    "RecipeDetailDefinition",
+    "RecipeDetailDefinitionSlotAnnotations",
+    "RecipeDetailDefinitionSlotAnnotationsSelectAll",
+    "RecipeDetailDefinitionSlotAnnotationsSelectTag",
+    "RecipeDetailDefinitionSlotPhoto",
+    "RecipeDetailDefinitionStep",
+    "RecipeDetailDefinitionStepInputsValue",
+    "RecipeDetailVersion",
+    "RecipeDetailVersionBasisCountOnly",
+    "RecipeDetailVersionBasisReadable",
+    "RecipeDetailVersionBasisReadableEntry",
+    "RecipeDetailVersionContextHidden",
+    "RecipeDetailVersionContextNone",
+    "RecipeDetailVersionContextPhoto",
+    "RecipeDetailVersionDefinition",
+    "RecipeDetailVersionDefinitionSlotAnnotations",
+    "RecipeDetailVersionDefinitionSlotAnnotationsSelectAll",
+    "RecipeDetailVersionDefinitionSlotAnnotationsSelectTag",
+    "RecipeDetailVersionDefinitionSlotPhoto",
+    "RecipeDetailVersionDefinitionStep",
+    "RecipeDetailVersionDefinitionStepInputsValue",
+    "RecipeList",
+    "RecipeListRecipe",
+    "RecipeListRecipeDefinition",
+    "RecipeListRecipeDefinitionSlotAnnotations",
+    "RecipeListRecipeDefinitionSlotAnnotationsSelectAll",
+    "RecipeListRecipeDefinitionSlotAnnotationsSelectTag",
+    "RecipeListRecipeDefinitionSlotPhoto",
+    "RecipeListRecipeDefinitionStep",
+    "RecipeListRecipeDefinitionStepInputsValue",
+    "RecipeRun",
+    "RecipeRunAgain",
+    "RecipeRunAgainRun",
+    "RecipeRunStart",
+    "RecipeRunStartRun",
+    "RecipeRunStep",
+    "RecipeRunStepOutput",
+    "RecipeRunStepOutputMetricsValue",
+    "RecipeRunStepOutputProvenance",
+    "RecipeRunStepOutputProvenanceCodec",
+    "RecipeSummary",
+    "RecipeSummaryDefinition",
+    "RecipeSummaryDefinitionSlotAnnotations",
+    "RecipeSummaryDefinitionSlotAnnotationsSelectAll",
+    "RecipeSummaryDefinitionSlotAnnotationsSelectTag",
+    "RecipeSummaryDefinitionSlotPhoto",
+    "RecipeSummaryDefinitionStep",
+    "RecipeSummaryDefinitionStepInputsValue",
     "Rule",
     "RuleAction",
     "RuleActionActionDefinition",

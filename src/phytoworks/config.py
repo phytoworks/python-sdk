@@ -110,9 +110,7 @@ class Config:
                 )
             kind, secret, source = None, "", None
         if require_credential and kind is None:
-            raise CredentialMissingError(
-                "No PhytoWorks credential found; run `pws auth login` (device login) or set PWS_SESSION_TOKEN."
-            )
+            raise CredentialMissingError("No PhytoWorks credential found; run `pws auth login` (device login).")
 
         requested_base_url = base_url or os.getenv("PWS_BASE_URL")
         requested_org = org or os.getenv("PWS_ORG") or None

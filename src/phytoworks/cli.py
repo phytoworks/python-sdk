@@ -60,7 +60,7 @@ from .errors import (
     TransportError,
     UnknownAction,
 )
-from .facade import MAX_PAGE_SIZE, PWS, IssuedAccessKey, _prepare_download_directory
+from .facade import MAX_PAGE_SIZE, PWS, IssuedAccessKey, _outcome_unknown, _prepare_download_directory
 from .models import SpotStructure
 from .models.generated import SpotStructureDeviceAction, SpotStructureDeviceComponentAction
 from .phenos import (
@@ -187,13 +187,14 @@ phenos_execution_app = next(
     for group in phenos_app.registered_groups
     if group.name == "execution" and group.typer_instance is not None
 )
-app.add_typer(phenos_app, name="phenos")
+# Hidden from `pws --help` until the Phenos commands are public; they still run when named.
+app.add_typer(phenos_app, name="phenos", hidden=True)
 approvals_app = typer.Typer(
     cls=PhenosGroup,
     no_args_is_help=True,
     help="Requests from this login that wait for a person's approval in Phenos.",
 )
-app.add_typer(approvals_app, name="approvals")
+app.add_typer(approvals_app, name="approvals", hidden=True)
 
 
 # Typed exit codes.
@@ -226,6 +227,11 @@ def exit_code_for(error: PWSError) -> int:
         return EXIT_NOT_FOUND
     if isinstance(error, AuthError):
         return EXIT_AUTH
+    # A sent action whose reply never came may still run on the device: the outcome is unknown, not an error.
+    # Only an action run attaches an execution id, so other commands' transport errors stay generic. A definite
+    # reply (a 409 replay conflict) is an error: exit 7 would invite a rerun that fails the same way.
+    if error.execution_id is not None and _outcome_unknown(error):
+        return EXIT_ACTION_TIMEOUT
     return EXIT_ERROR
 
 
@@ -568,7 +574,7 @@ def _console(*, stderr: bool = False) -> Console:
     return Console(stderr=stderr, no_color="NO_COLOR" in os.environ)
 
 
-def _report(error: PWSError) -> int:
+def _error_text(error: PWSError) -> str:
     message = str(error)
     if error.code:
         message = f"[{error.code}] {message}"
@@ -576,6 +582,14 @@ def _report(error: PWSError) -> int:
         message = f"{message} (retry_after={error.retry_after}s)"
     if error.request_id:
         message = f"{message} (requestId={error.request_id})"
+    if error.execution_id:
+        # The id a retry must reuse (`--execution-id`) so Hub replays the sent action instead of starting another.
+        message = f"{message} (executionId={error.execution_id})"
+    return message
+
+
+def _report(error: PWSError, *, subject: str | None = None) -> int:
+    message = _error_text(error) if subject is None else f"{subject}: {_error_text(error)}"
     _console(stderr=True).print(f"[red]error:[/red] {escape(message)}", highlight=False, soft_wrap=True)
     return exit_code_for(error)
 
@@ -934,6 +948,13 @@ def actions_run(
     device: Annotated[str | None, typer.Option("--device", help="Device id or identifier.")] = None,
     component: Annotated[str | None, typer.Option("--component", help="Component id or identifier.")] = None,
     wait: Annotated[bool, typer.Option("--wait", help="Wait for a terminal execution status.")] = False,
+    execution_id: Annotated[
+        str | None,
+        typer.Option(
+            "--execution-id",
+            help="Reuse the executionId a failed run printed: Hub replays that run instead of starting the action again.",
+        ),
+    ] = None,
 ) -> None:
     """Run a spot's action on its device, optionally waiting for the result."""
 
@@ -941,7 +962,9 @@ def actions_run(
     arguments = _action_params(params)
 
     def action(client: PWS) -> None:
-        execution = client.spots.get(spot).actions.run(name, arguments, device=device, component=component, wait=wait)
+        execution = client.spots.get(spot).actions.run(
+            name, arguments, device=device, component=component, wait=wait, execution_id=execution_id
+        )
         _emit_execution(context, execution.result if wait and execution.result is not None else execution.model)
 
     _run(context, action)
@@ -2062,7 +2085,11 @@ def media_download(
         Path, typer.Option("--dest", help="Target directory; created when missing.", file_okay=False)
     ] = Path("."),
 ) -> None:
-    """Download assets; prints ``{"id","path","bytes"}`` per asset under --json/--jsonl, paths under -q."""
+    """Download assets; prints ``{"id","path","bytes"}`` per asset under --json/--jsonl, paths under -q.
+
+    A failed asset is reported (``{"id","error"}`` under --json/--jsonl) and the rest are still tried; the command
+    then exits with the first failure's code.
+    """
 
     context: CliContext = ctx.obj
     if not asset and capture is None:
@@ -2070,11 +2097,27 @@ def media_download(
 
     def action(client: PWS) -> None:
         directory = _prepare_download_directory(dest)
-        targets: list[str] = list(asset or [])
+        # A capture's listing already carries each asset's format, so it needs no per-asset metadata read.
+        targets: list[tuple[str, str | None]] = [(identifier, None) for identifier in asset or []]
         if capture is not None:
-            targets.extend(item.id for item in client.captures.get(capture).media)
-        results = [_download_one(client, context, identifier, directory) for identifier in targets]
-        _emit_downloads(context, results)
+            targets.extend((item.id, item.format) for item in client.captures.get(capture).media)
+        rows: list[dict[str, object]] = []
+        failed: int | None = None
+        for identifier, asset_format in targets:
+            try:
+                row = _download_one(client, context, identifier, directory, asset_format=asset_format)
+            except PWSError as exc:
+                # One failed asset neither hides the files already saved nor skips the rest.
+                code = _report(exc, subject=identifier)
+                failed = code if failed is None else failed
+                row = {"id": identifier, "error": _error_text(exc)}
+            rows.append(row)
+            if context.mode is not OutputMode.JSON:
+                _emit_download_row(context, row)
+        if context.mode is OutputMode.JSON:
+            typer.echo(render_json({"items": rows}))
+        if failed is not None:
+            raise typer.Exit(code=failed)
 
     _run(context, action)
 
@@ -2185,10 +2228,12 @@ def media_download_array(
     _run(context, action)
 
 
-def _download_one(client: PWS, context: CliContext, identifier: str, dest: Path) -> dict[str, object]:
+def _download_one(
+    client: PWS, context: CliContext, identifier: str, dest: Path, *, asset_format: str | None = None
+) -> dict[str, object]:
     progress = _progress(context, identifier)
     if progress is None:
-        path = client.media.download(identifier, dest)
+        path = client.media.download(identifier, dest, _format=asset_format)
     else:
         with progress:
             task = progress.add_task("download", total=None)
@@ -2196,27 +2241,34 @@ def _download_one(client: PWS, context: CliContext, identifier: str, dest: Path)
             def on_progress(done: int, total: int | None) -> None:
                 progress.update(task, completed=done, total=total)
 
-            path = client.media.download(identifier, dest, on_progress=on_progress)
+            path = client.media.download(identifier, dest, on_progress=on_progress, _format=asset_format)
     size = (
         sum(file.stat().st_size for file in path.rglob("*") if file.is_file()) if path.is_dir() else path.stat().st_size
     )
     return {"id": identifier, "path": str(path), "bytes": size}
 
 
+def _emit_download_row(context: CliContext, row: dict[str, object]) -> None:
+    """Print one finished download in a streaming mode; a failed row was already reported on stderr."""
+
+    if context.mode is OutputMode.JSONL:
+        typer.echo(render_json(row))
+    elif "error" in row:
+        return
+    elif context.mode is OutputMode.QUIET:
+        typer.echo(str(row["path"]))
+    else:
+        _console(stderr=True).print(f"saved {row['path']} ({row['bytes']} bytes)", highlight=False)
+        typer.echo(str(row["path"]))
+
+
 def _emit_downloads(context: CliContext, results: Iterable[dict[str, object]]) -> None:
     rows = list(results)
-    if context.mode is OutputMode.QUIET:
-        for row in rows:
-            typer.echo(str(row["path"]))
-    elif context.mode is OutputMode.JSONL:
-        for row in rows:
-            typer.echo(render_json(row))
-    elif context.mode is OutputMode.JSON:
+    if context.mode is OutputMode.JSON:
         typer.echo(render_json({"items": rows}))
-    else:
-        for row in rows:
-            _console(stderr=True).print(f"saved {row['path']} ({row['bytes']} bytes)", highlight=False)
-            typer.echo(str(row["path"]))
+        return
+    for row in rows:
+        _emit_download_row(context, row)
 
 
 def main() -> None:
